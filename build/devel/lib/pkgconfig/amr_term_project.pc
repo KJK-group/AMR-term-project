@@ -1,0 +1,8 @@
+prefix=/home/kristoffer/dev/AMR-term-project/build/devel
+
+Name: amr_term_project
+Description: Description of amr_term_project
+Version: 0.1.0
+Cflags:
+Libs: -L${prefix}/lib
+Requires:
