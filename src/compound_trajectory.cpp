@@ -1,6 +1,6 @@
 #include "compound_trajectory.hpp"
 
-namespace mdi::trajectory {
+namespace amr::trajectory {
 CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
                                        std::vector<Eigen::Vector3f> path, bool visualise,
                                        float marker_scale)
@@ -8,15 +8,16 @@ CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
     pub_visualisation = nh.advertise<visualization_msgs::MarkerArray>("/mdi/visualisation",
                                                                       utils::DEFAULT_QUEUE_SIZE);
 
+    assert(path.size() > 1);
     // treat difference between each point in path as a vector
     vector<Eigen::Vector3f> vectors;
     std::adjacent_difference(path.begin(), path.end(), std::back_inserter(vectors));
     vectors.erase(vectors.begin());
 
-    // std::cout << "VECTORS: " << std::endl;
-    // for (auto& v : vectors) {
-    //     std::cout << v << "\n" << std::endl;
-    // }
+    std::cout << "VECTORS: " << std::endl;
+    for (auto& v : vectors) {
+        std::cout << v << "\n" << std::endl;
+    }
 
     // find angle betweeen each ordered pair of vectors
     vector<float> angles;
@@ -34,10 +35,10 @@ CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
                        return (dot) / (n1 * n2);
                    });
     angles.push_back(1);
-    // std::cout << "ANGLES:" << std::endl;
-    // for (auto& a : angles) {
-    //     std::cout << a << std::endl;
-    // }
+    std::cout << "ANGLES:" << std::endl;
+    for (auto& a : angles) {
+        std::cout << a << std::endl;
+    }
 
     // find splitting indices for each section of the path
     // splitting one path point before the point where a!=180
@@ -45,13 +46,13 @@ CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
     vector<bool> straight;
     vector<int> splits = {0};
     // auto straight = false;
-    for (int i = 0; i < angles.size(); i++) {
+    for (int i = 0; i < angles.size() - 1; i++) {
         auto angle_before = i > 0 ? angles[i - 1] : 1;
         auto angle_current = angles[i];
         auto angle_after = i < angles.size() ? angles[i + 1] : 1;
-        // std::cout << "angle_before: " << angle_before << std::endl;
-        // std::cout << "angle_current: " << angle_current << std::endl;
-        // std::cout << "angle_before: " << angle_after << std::endl;
+        std::cout << "angle_before: " << angle_before << std::endl;
+        std::cout << "angle_current: " << angle_current << std::endl;
+        std::cout << "angle_after: " << angle_after << std::endl;
         static constexpr auto float_eps = std::numeric_limits<float>::epsilon() * 2;
         if (std::abs(angle_current - 1) < float_eps) {
             if (std::abs(angle_before - 1) > float_eps) {
@@ -67,17 +68,20 @@ CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
         // std::cout << std::endl;
     }
     // splits.push_back(angles.size());
-    // splits.push_back(path.size() - 1);
+    splits.push_back(path.size() - 1);
+    if (straight.empty()) {
+        straight.push_back(true);
+    }
 
-    // std::cout << "STRAIGHT:" << std::endl;
-    // for (int s = 0; s < straight.size(); s++) {
-    //     std::cout << straight[s] << std::endl;
-    // }
+    std::cout << "STRAIGHT:" << std::endl;
+    for (int s = 0; s < straight.size(); s++) {
+        std::cout << straight[s] << std::endl;
+    }
 
-    // std::cout << "SPLITS:" << std::endl;
-    // for (auto& s : splits) {
-    //     std::cout << s << std::endl;
-    // }
+    std::cout << "SPLITS:" << std::endl;
+    for (auto& s : splits) {
+        std::cout << s << std::endl;
+    }
 
     // uses each pair of splitting indices to slice the path into sections,
     // including points at starting and ending indices
@@ -86,19 +90,20 @@ CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
                    std::back_inserter(sections), [&](auto s1, auto s2) {
                        vector<Eigen::Vector3f> section;
                        for (s1; s1 <= s2; s1++) {
+                           std::cout << "path[" << s1 << "]" << path[s1] << std::endl;
                            section.push_back(path[s1]);
                        }
                        return section;
                    });
 
-    // std::cout << "SECTIONS" << std::endl;
-    // for (int s = 0; s < sections.size(); s++) {
-    //     std::cout << "section " << s << std::endl;
-    //     std::cout << "straight: " << straight[s] << std::endl;
-    //     for (auto& s : sections[s]) {
-    //         std::cout << s << std::endl;
-    //     }
-    // }
+    std::cout << "SECTIONS" << std::endl;
+    for (int s = 0; s < sections.size(); s++) {
+        std::cout << "section " << s << std::endl;
+        std::cout << "straight: " << straight[s] << std::endl;
+        for (auto& s : sections[s]) {
+            std::cout << s << std::endl;
+        }
+    }
 
     // create list of trajectories
     std::transform(sections.begin(), sections.end(), straight.begin(),
@@ -227,4 +232,4 @@ auto CompoundTrajectory::get_point_at_distance(float distance) -> Eigen::Vector3
     auto distance_in_spline = t_length - (distance - distance_lut[trajectory_idx - 1]);
     return std::visit([&](auto& t) { return t.get_point_at_distance(distance_in_spline); }, t);
 }
-}  // namespace mdi::trajectory
+}  // namespace amr::trajectory

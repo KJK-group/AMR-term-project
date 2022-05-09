@@ -1,7 +1,6 @@
 #ifndef _MULTI_DRONE_INSPECTION_ROSPARAM_HPP_
 #define _MULTI_DRONE_INSPECTION_ROSPARAM_HPP_
 
-#include <fmt/core.h>
 #include <ros/ros.h>
 
 #include <exception>
@@ -9,7 +8,7 @@
 #include <string_view>
 // #include <variant>
 
-namespace mdi::utils::rosparam {
+namespace amr::utils::rosparam {
 
 // using RosParameterT = std::variant<std::string, int, double, bool, std::vector<RosParameterT>>;
 
@@ -20,10 +19,11 @@ auto get(std::string_view key) -> T {
         return default_value;
     }
 
-    const auto error_msg = fmt::format("key {} does not exist in the parameter server.", key);
+    const std::string error_msg =
+        "key " + std::string(key) + " does not exist in the parameter server.";
     throw std::invalid_argument(error_msg);
 }
 
-}  // namespace mdi::utils::rosparam
+}  // namespace amr::utils::rosparam
 
 #endif  // _MULTI_DRONE_INSPECTION_ROSPARAM_HPP_

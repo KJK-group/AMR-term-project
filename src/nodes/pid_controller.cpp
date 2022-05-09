@@ -9,11 +9,9 @@
 #include "amr_term_project/PointNormStamped.h"
 #include "boost/format.hpp"
 #include "transformlistener.hpp"
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 #define TOLERANCE_DISTANCE 0.1
-#define FRAME_WORLD "map"  // world/global frame
-#define FRAME_BODY "odom"  // drone body frame
 
 // escape codes
 constexpr auto MAGENTA = "\u001b[35m";
@@ -75,7 +73,7 @@ auto pid_command_from_error(Eigen::Vector3f error) -> geometry_msgs::TwistStampe
     // linear velocity controller output
     Eigen::Vector3f c = k_rho_p * error + k_rho_i * error_integral + k_rho_d * error_derivative;
     // clamping the velocity command to a max velocity
-    c = clamp_velocity(c);
+    c = c;
 
     // TODO: angular velocity controller output
     // std::cout << c << std::endl;
@@ -84,7 +82,7 @@ auto pid_command_from_error(Eigen::Vector3f error) -> geometry_msgs::TwistStampe
     geometry_msgs::TwistStamped command{};
     command.header.seq = seq_command++;
     command.header.stamp = ros::Time::now();
-    command.header.frame_id = "odom";  // FIX ME
+    command.header.frame_id = amr::utils::FRAME_BODY;  // FIX ME
     command.twist.linear.x = c.x();
     command.twist.linear.y = c.y();
     command.twist.linear.z = c.z();
@@ -128,17 +126,19 @@ auto main(int argc, char** argv) -> int {
 
     //----------------------------------------------------------------------------------------------
     // state subscriber
-    sub_mission_state = nh.subscribe<amr_term_project::MissionStateStamped>("/amr/mission/state",
-                                                                            10, mission_state_cb);
+    sub_mission_state = nh.subscribe<amr_term_project::MissionStateStamped>(
+        "/amr/mission/state", amr::utils::DEFAULT_QUEUE_SIZE, mission_state_cb);
     // odom subscriber
-    sub_odom = nh.subscribe<nav_msgs::Odometry>("/mavros/local_position/odom", 10, odom_cb);
+    sub_odom = nh.subscribe<nav_msgs::Odometry>("/mavros/local_position/odom",
+                                                amr::utils::DEFAULT_QUEUE_SIZE, odom_cb);
 
     //----------------------------------------------------------------------------------------------
     // velocity publisher
-    pub_velocity =
-        nh.advertise<geometry_msgs::TwistStamped>("/mavros/setpoint_velocity/cmd_vel", 10);
+    pub_velocity = nh.advertise<geometry_msgs::TwistStamped>("/mavros/setpoint_velocity/cmd_vel",
+                                                             amr::utils::DEFAULT_QUEUE_SIZE);
     // error publisher
-    pub_error = nh.advertise<amr_term_project::PointNormStamped>("/amr/mission/error", 10);
+    pub_error = nh.advertise<amr_term_project::PointNormStamped>("/amr/mission/error",
+                                                                 amr::utils::DEFAULT_QUEUE_SIZE);
 
     //----------------------------------------------------------------------------------------------
     // PID control loop
@@ -146,11 +146,11 @@ auto main(int argc, char** argv) -> int {
         // TODO: only do something if the mission state is different from PASSIVE
         auto expected_position = Eigen::Vector3f(state.target.position.x, state.target.position.y,
                                                  state.target.position.z);
-        if (auto error_opt =
-                tf_listener.transform_vec3(FRAME_BODY, FRAME_WORLD, expected_position)) {
+        if (auto error_opt = tf_listener.transform_vec3(
+                amr::utils::FRAME_BODY, amr::utils::FRAME_WORLD, expected_position)) {
             // converting from NED to ENU coordinates
-            error = Eigen::Vector3f(error_opt.value().y(), error_opt.value().x(),
-                                    -error_opt.value().z());
+            error = Eigen::Vector3f(error_opt.value().x(), error_opt.value().y(),
+                                    error_opt.value().z());
         }
         auto command_velocity = pid_command_from_error(error);
 
@@ -160,7 +160,7 @@ auto main(int argc, char** argv) -> int {
         amr_term_project::PointNormStamped error_msg;
         error_msg.header.seq = seq_error++;
         error_msg.header.stamp = ros::Time::now();
-        error_msg.header.frame_id = FRAME_BODY;
+        error_msg.header.frame_id = amr::utils::FRAME_BODY;
         error_msg.point.x = error.x();
         error_msg.point.y = error.y();
         error_msg.point.z = error.z();

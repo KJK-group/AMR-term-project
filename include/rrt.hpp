@@ -5,15 +5,15 @@
 #include <cstddef>
 #include <memory>
 
-#include "mdi/common_headers.hpp"
-#include "mdi/octomap.hpp"
-#include "mdi/utils/random.hpp"
+#include "octomap.hpp"
+#include "utils/common_headers.hpp"
+#include "utils/random.hpp"
 
 #ifdef USE_KDTREE
 #include "kdtree/kdtree3.hpp"
 #endif  // USE_KDTREE
 
-namespace mdi::rrt {
+namespace amr::rrt {
 
 using vec3 = Eigen::Vector3f;
 
@@ -67,7 +67,8 @@ class RRT {
     auto clear() -> void {
         nodes_.clear();
 #ifdef USE_KDTREE
-        std::for_each(kdtree3s_.begin(), kdtree3s_.end(), [&](auto& bucket) { bucket.delete_trees(); });
+        std::for_each(kdtree3s_.begin(), kdtree3s_.end(),
+                      [&](auto& bucket) { bucket.delete_trees(); });
         kdtree3s_.erase(kdtree3s_.begin() + 1, kdtree3s_.end());
 #endif  // USE_KDTREE
 
@@ -104,7 +105,8 @@ class RRT {
      * @param f the function to call.
      * @param skip_root if true then @ref f will be called with itself as parent and child.
      */
-    auto bft(const std::function<void(const vec3& pt, const vec3& parent_pt)>& f, bool skip_root = true) const -> void {
+    auto bft(const std::function<void(const vec3& pt, const vec3& parent_pt)>& f,
+             bool skip_root = true) const -> void {
         bft_(f, skip_root);
     }
 
@@ -133,38 +135,54 @@ class RRT {
     auto disable_perf_logging() -> void { log_perf_measurements_enabled_ = false; }
 #endif  // MEASURE_PERF
 
-    auto register_cb_for_event_on_new_node_created(std::function<void(const vec3&, const vec3&)> cb) -> void {
+    auto register_cb_for_event_on_new_node_created(std::function<void(const vec3&, const vec3&)> cb)
+        -> void {
         on_new_node_created_cb_list.push_back(cb);
     }
 
-    auto register_cb_for_event_before_optimizing_waypoints(std::function<void(const vec3&, const vec3&)> cb) -> void {
+    auto register_cb_for_event_before_optimizing_waypoints(
+        std::function<void(const vec3&, const vec3&)> cb) -> void {
         before_optimizing_waypoints_cb_list.push_back(cb);
     }
 
-    auto register_cb_for_event_after_optimizing_waypoints(std::function<void(const vec3&, const vec3&)> cb) -> void {
+    auto register_cb_for_event_after_optimizing_waypoints(
+        std::function<void(const vec3&, const vec3&)> cb) -> void {
         after_optimizing_waypoints_cb_list.push_back(cb);
     }
 
-    auto register_cb_for_event_on_goal_reached(std::function<void(const vec3&, size_t)> cb) -> void {
+    auto register_cb_for_event_on_goal_reached(std::function<void(const vec3&, size_t)> cb)
+        -> void {
         on_goal_reached_cb_list.push_back(cb);
     }
-    auto register_cb_for_event_on_trying_full_path(std::function<void(const vec3&, const vec3&)> cb) -> void {
+    auto register_cb_for_event_on_trying_full_path(std::function<void(const vec3&, const vec3&)> cb)
+        -> void {
         on_trying_full_path_cb_list.push_back(cb);
     }
     auto register_cb_for_event_on_clearing_nodes_in_tree(std::function<void()> cb) -> void {
         on_clearing_nodes_in_tree_cb_list.push_back(cb);
     }
 
-    auto register_cb_for_event_on_raycast(std::function<void(const vec3&, const vec3&, const float, bool)> cb) -> void {
+    auto register_cb_for_event_on_raycast(
+        std::function<void(const vec3&, const vec3&, const float, bool)> cb) -> void {
         on_raycast_cb_list.push_back(cb);
     }
 
-    auto unregister_cbs_for_event_on_new_node_created() -> void { on_new_node_created_cb_list.clear(); }
-    auto unregister_cbs_for_event_on_trying_full_path() -> void { on_trying_full_path_cb_list.clear(); }
-    auto unregister_cbs_for_event_before_optimizing_waypoints() -> void { before_optimizing_waypoints_cb_list.clear(); }
-    auto unregister_cbs_for_event_after_optimizing_waypoints() -> void { after_optimizing_waypoints_cb_list.clear(); }
+    auto unregister_cbs_for_event_on_new_node_created() -> void {
+        on_new_node_created_cb_list.clear();
+    }
+    auto unregister_cbs_for_event_on_trying_full_path() -> void {
+        on_trying_full_path_cb_list.clear();
+    }
+    auto unregister_cbs_for_event_before_optimizing_waypoints() -> void {
+        before_optimizing_waypoints_cb_list.clear();
+    }
+    auto unregister_cbs_for_event_after_optimizing_waypoints() -> void {
+        after_optimizing_waypoints_cb_list.clear();
+    }
     auto unregister_cbs_for_event_on_goal_reached() -> void { on_goal_reached_cb_list.clear(); }
-    auto unregister_cbs_for_event_on_clearing_nodes_in_tree() -> void { on_clearing_nodes_in_tree_cb_list.clear(); }
+    auto unregister_cbs_for_event_on_clearing_nodes_in_tree() -> void {
+        on_clearing_nodes_in_tree_cb_list.clear();
+    }
     auto unregister_cbs_for_event_on_raycast() -> void { on_raycast_cb_list.clear(); }
 
     auto unregister_cbs_for_all_events() -> void {
@@ -178,19 +196,35 @@ class RRT {
     }
 
     auto enable_cbs_for_event_on_new_node_created() -> void { on_new_node_created_status_ = true; }
-    auto enable_cbs_for_event_before_optimizing_waypoints() -> void { before_optimizing_waypoints_status_ = true; }
-    auto enable_cbs_for_event_after_optimizing_waypoints() -> void { after_optimizing_waypoints_status_ = true; }
+    auto enable_cbs_for_event_before_optimizing_waypoints() -> void {
+        before_optimizing_waypoints_status_ = true;
+    }
+    auto enable_cbs_for_event_after_optimizing_waypoints() -> void {
+        after_optimizing_waypoints_status_ = true;
+    }
     auto enable_cbs_for_event_on_goal_reached() -> void { on_goal_reached_status_ = true; }
     auto enable_cbs_for_event_on_trying_full_path() -> void { on_trying_full_path_status_ = true; }
-    auto enable_cbs_for_event_on_clearing_nodes_in_tree() -> void { on_clearing_nodes_in_tree_status_ = true; }
+    auto enable_cbs_for_event_on_clearing_nodes_in_tree() -> void {
+        on_clearing_nodes_in_tree_status_ = true;
+    }
     auto enable_cbs_for_event_on_raycast() -> void { on_raycast_status_ = true; }
 
-    auto disable_cbs_for_event_on_new_node_created() -> void { on_new_node_created_status_ = false; }
-    auto disable_cbs_for_event_before_optimizing_waypoints() -> void { before_optimizing_waypoints_status_ = false; }
-    auto disable_cbs_for_event_after_optimizing_waypoints() -> void { after_optimizing_waypoints_status_ = false; }
+    auto disable_cbs_for_event_on_new_node_created() -> void {
+        on_new_node_created_status_ = false;
+    }
+    auto disable_cbs_for_event_before_optimizing_waypoints() -> void {
+        before_optimizing_waypoints_status_ = false;
+    }
+    auto disable_cbs_for_event_after_optimizing_waypoints() -> void {
+        after_optimizing_waypoints_status_ = false;
+    }
     auto disable_cbs_for_event_on_goal_reached() -> void { on_goal_reached_status_ = false; }
-    auto disable_cbs_for_event_on_trying_full_path() -> void { on_trying_full_path_status_ = false; }
-    auto disable_cbs_for_event_on_clearing_nodes_in_tree() -> void { on_clearing_nodes_in_tree_status_ = false; }
+    auto disable_cbs_for_event_on_trying_full_path() -> void {
+        on_trying_full_path_status_ = false;
+    }
+    auto disable_cbs_for_event_on_clearing_nodes_in_tree() -> void {
+        on_clearing_nodes_in_tree_status_ = false;
+    }
     auto disable_cbs_for_event_on_raycast() -> void { on_raycast_status_ = false; }
 
     auto toggle_cbs_for_event_on_new_node_created() -> void {
@@ -202,7 +236,9 @@ class RRT {
     auto toggle_cbs_for_event_after_optimizing_waypoints() -> void {
         after_optimizing_waypoints_status_ = ! after_optimizing_waypoints_status_;
     }
-    auto toggle_cbs_for_event_on_goal_reached() -> void { on_goal_reached_status_ = ! on_goal_reached_status_; }
+    auto toggle_cbs_for_event_on_goal_reached() -> void {
+        on_goal_reached_status_ = ! on_goal_reached_status_;
+    }
     auto toggle_cbs_for_event_on_trying_full_path() -> void {
         on_trying_full_path_status_ = ! on_trying_full_path_status_;
     }
@@ -210,7 +246,9 @@ class RRT {
         on_clearing_nodes_in_tree_status_ = ! on_clearing_nodes_in_tree_status_;
     }
 
-    auto toggle_cbs_for_event_on_raycast() -> void { on_raycast_status_ = ! on_clearing_nodes_in_tree_status_; }
+    auto toggle_cbs_for_event_on_raycast() -> void {
+        on_raycast_status_ = ! on_clearing_nodes_in_tree_status_;
+    }
 
     [[nodiscard]] auto empty() const -> bool { return nodes_.empty(); }
     [[nodiscard]] auto size() const -> std::size_t { return nodes_.size(); };
@@ -220,7 +258,7 @@ class RRT {
     [[nodiscard]] auto start_position() const -> vec3 { return start_position_; }
     [[nodiscard]] auto goal_position() const -> vec3 { return goal_position_; }
 
-    auto assign_octomap(mdi::Octomap* map) -> void { octomap_ = map; };
+    auto assign_octomap(amr::Octomap* map) -> void { octomap_ = map; };
 
    private:
     RRT() = default;
@@ -230,7 +268,8 @@ class RRT {
 
     struct node_t {
        public:
-        node_t(vec3 pos, node_t* parent_ = nullptr) : parent(parent_), children{}, position_(std::move(pos)) {}
+        node_t(vec3 pos, node_t* parent_ = nullptr)
+            : parent(parent_), children{}, position_(std::move(pos)) {}
 
         node_t* parent = nullptr;
         std::vector<node_t*> children{};
@@ -263,8 +302,8 @@ class RRT {
      * @param f the function to call.
      * @param skip_root if true then @ref f will be called with itself as parent and child.
      */
-    auto bft_(const std::function<void(const vec3& parent_pt, const vec3& child_pt)>& f, bool skip_root = true) const
-        -> void;
+    auto bft_(const std::function<void(const vec3& parent_pt, const vec3& child_pt)>& f,
+              bool skip_root = true) const -> void;
     [[nodiscard]] auto grow_() -> bool;
 
     auto insert_node_(const vec3& pos, node_t* parent) -> node_t&;
@@ -318,7 +357,7 @@ class RRT {
 
     std::size_t linear_search_start_index_{0};
 
-    mdi::Octomap* octomap_ = nullptr;
+    amr::Octomap* octomap_ = nullptr;
 
 #ifdef USE_KDTREE
 
@@ -335,14 +374,17 @@ class RRT {
         kdtree3_bucket_t(int size_of_a_tree_) : size_of_a_tree(size_of_a_tree_) {}
 
         [[nodiscard]] auto number_of_trees() const {
-            return std::count_if(forest.begin(), forest.end(), [](const auto& tree) { return tree != nullptr; });
+            return std::count_if(forest.begin(), forest.end(),
+                                 [](const auto& tree) { return tree != nullptr; });
         }
         [[nodiscard]] auto bucket_is_full() const -> bool {
             return number_of_trees() == max_number_of_kdtrees_per_bucket_;
         }
         [[nodiscard]] auto empty() const { return number_of_trees() == 0; }
 
-        [[nodiscard]] auto number_of_nodes_in_bucket() const { return number_of_trees() * size_of_a_tree; }
+        [[nodiscard]] auto number_of_nodes_in_bucket() const {
+            return number_of_trees() * size_of_a_tree;
+        }
 
         auto delete_trees() {
             std::for_each(forest.begin(), forest.end(), [&](auto& tree) {
@@ -378,13 +420,14 @@ class RRT {
     std::vector<kdtree3_bucket_t> kdtree3s_{{max_number_of_nodes_to_do_linear_search_on_}};
 
     auto add_bucket() -> void {
-        kdtree3s_.emplace_back(static_cast<int>(max_number_of_nodes_to_do_linear_search_on_ *
-                                                std::pow(max_number_of_kdtrees_per_bucket_, kdtree3s_.size())));
+        kdtree3s_.emplace_back(
+            static_cast<int>(max_number_of_nodes_to_do_linear_search_on_ *
+                             std::pow(max_number_of_kdtrees_per_bucket_, kdtree3s_.size())));
     }
 
 #endif  // USE_KDTREE
 
-    mdi::utils::random::random_point_generator rng_{0.0, 1.0};
+    amr::utils::random::random_point_generator rng_{0.0, 1.0};
 
     template <typename... Ts>
     using action = std::function<void(Ts...)>;
@@ -401,9 +444,11 @@ class RRT {
     std::vector<std::function<void(const vec3&, size_t)>> on_goal_reached_cb_list{};
     std::vector<std::function<void(const vec3&, const vec3&)>> on_trying_full_path_cb_list{};
     std::vector<std::function<void()>> on_clearing_nodes_in_tree_cb_list{};
-    std::vector<std::function<void(const vec3&, const vec3&)>> before_optimizing_waypoints_cb_list{};
+    std::vector<std::function<void(const vec3&, const vec3&)>>
+        before_optimizing_waypoints_cb_list{};
     std::vector<std::function<void(const vec3&, const vec3&)>> after_optimizing_waypoints_cb_list{};
-    std::vector<std::function<void(const vec3&, const vec3&, const float, bool)>> on_raycast_cb_list{};
+    std::vector<std::function<void(const vec3&, const vec3&, const float, bool)>>
+        on_raycast_cb_list{};
 
     bool on_new_node_created_status_ = true;
     bool on_goal_reached_status_ = true;
@@ -421,4 +466,4 @@ class RRT {
 #endif  // MEASURE_PERF
 };
 
-}  // namespace mdi::rrt
+}  // namespace amr::rrt

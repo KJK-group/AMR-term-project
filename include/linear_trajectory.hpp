@@ -4,7 +4,7 @@
 #include <eigen3/Eigen/Dense>
 #include <vector>
 
-namespace mdi::trajectory {
+namespace amr::trajectory {
 class LinearTrajectory {
    public:
     LinearTrajectory(Eigen::Vector3f start, Eigen::Vector3f end);
@@ -16,6 +16,6 @@ class LinearTrajectory {
     Eigen::Vector3f end;
     float length;
 };
-}  // namespace mdi::trajectory
+}  // namespace amr::trajectory
 
 #endif  // _MDI_LINEAR_TRAJECTORY_HPP_

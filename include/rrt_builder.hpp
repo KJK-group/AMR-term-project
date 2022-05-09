@@ -3,9 +3,9 @@
 #include <eigen3/Eigen/Dense>
 #include <memory>
 
-#include "mdi/rrt/rrt.hpp"
+#include "rrt.hpp"
 
-namespace mdi::rrt {
+namespace amr::rrt {
 
 /**
  * @brief builder pattern for RRT class
@@ -50,7 +50,8 @@ class RRTBuilder final {
     }
     RRTBuilder& goal_bias(float goal_bias) {
         if (! (0 <= goal_bias && goal_bias <= 1.f)) {
-            auto err_msg = "goal_bias must be in the range [0., 1.] but was " + std::to_string(goal_bias);
+            auto err_msg =
+                "goal_bias must be in the range [0., 1.] but was " + std::to_string(goal_bias);
             throw std::invalid_argument(err_msg);
         }
         rrt_.goal_bias_ = goal_bias;
@@ -59,7 +60,8 @@ class RRTBuilder final {
 
     RRTBuilder& probability_of_testing_full_path_from_new_node_to_goal(float probability) {
         if (! (0 <= probability && probability <= 1.f)) {
-            auto err_msg = "probability must be in the range [0., 1.] but was " + std::to_string(probability);
+            auto err_msg =
+                "probability must be in the range [0., 1.] but was " + std::to_string(probability);
             throw std::invalid_argument(err_msg);
         }
         rrt_.probability_of_testing_full_path_from_new_node_to_goal_ = probability;
@@ -67,11 +69,13 @@ class RRTBuilder final {
     }
 
     RRTBuilder& on_new_node_created(
-        std::function<void(const Eigen::Vector3f& parent_node, const Eigen::Vector3f& new_node)> cb) {
+        std::function<void(const Eigen::Vector3f& parent_node, const Eigen::Vector3f& new_node)>
+            cb) {
         rrt_.on_new_node_created_cb_list.push_back(cb);
         return *this;
     }
-    RRTBuilder& on_goal_reached(std::function<void(const Eigen::Vector3f& goal_node, std::size_t n_iterations)> cb) {
+    RRTBuilder& on_goal_reached(
+        std::function<void(const Eigen::Vector3f& goal_node, std::size_t n_iterations)> cb) {
         rrt_.on_goal_reached_cb_list.push_back(cb);
         return *this;
     }
@@ -87,7 +91,7 @@ class RRTBuilder final {
         return *this;
     }
 
-    // RRTBuilder& octomap(mdi::Octomap& map) {
+    // RRTBuilder& octomap(amr::Octomap& map) {
     //     // rrt_.octomap_ = std::make_unique(map);
     //     rrt_.octomap_ = std::make_unique(map);
     //     return *this;
@@ -97,6 +101,6 @@ class RRTBuilder final {
 
    private:
     RRT rrt_{};
-};  // namespace mdi::rrt
+};  // namespace amr::rrt
 
-}  // namespace mdi::rrt
+}  // namespace amr::rrt

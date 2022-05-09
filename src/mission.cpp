@@ -1,8 +1,8 @@
 #include "mission.hpp"
 
-namespace mdi {
+namespace amr {
 Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Eigen::Vector3f home,
-                 bool visualise)
+                 int timeout_seconds, bool visualise)
     : inspection_complete(false),
       exploration_complete(false),
       step_count(0),
@@ -18,7 +18,7 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
       trajectory({nh, rate, {{0, 0, 0}, home_position}, visualise}) {
     // publishers
     pub_mission_state = nh.advertise<amr_term_project::MissionStateStamped>(
-        "/mdi/state", utils::DEFAULT_QUEUE_SIZE);
+        "/amr/mission/state", utils::DEFAULT_QUEUE_SIZE);
     pub_visualise = nh.advertise<visualization_msgs::Marker>("/mdi/visualisation_marker",
                                                              utils::DEFAULT_QUEUE_SIZE);
     pub_setpoint = nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_local/local",
@@ -28,7 +28,7 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
     sub_drone_state = nh.subscribe<mavros_msgs::State>("/mavros/state", utils::DEFAULT_QUEUE_SIZE,
                                                        &Mission::state_cb, this);
     sub_position_error = nh.subscribe<amr_term_project::PointNormStamped>(
-        "/mdi/error", utils::DEFAULT_QUEUE_SIZE, &Mission::error_cb, this);
+        "/amr/mission/error", utils::DEFAULT_QUEUE_SIZE, &Mission::error_cb, this);
 
     // services
     client_arm = nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
@@ -43,11 +43,11 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
     delta_time = ros::Duration(0);
     timeout_delta_time = ros::Duration(0);
 
-    timeout = ros::Duration(40);
+    timeout = ros::Duration(timeout_seconds);
     expected_position = Eigen::Vector3f(0, 0, 0);
 
     // state
-    state.header.frame_id = mdi::utils::FRAME_WORLD;
+    state.header.frame_id = amr::utils::FRAME_WORLD;
     state.state = PASSIVE;
 
     // path
@@ -83,19 +83,13 @@ auto Mission::get_state() -> enum state { return (enum state)state.state; }
  * @return false if request is rejected or a takeoff procedure is in progress
  */
 auto Mission::drone_takeoff(float altitude) -> bool {
-    // if (drone_state.mode != "AUTO.TAKEOFF") {
-    //     mavros_msgs::CommandTOL takeoff_msg;
-    //     takeoff_msg.request.altitude = home_position.z();
+    if (altitude == -1) {
+        altitude = home_position.z();
+    }
 
-    //     return (client_takeoff.call(takeoff_msg)) ? true : false;
-    // } else {
-    //     // std::cout << "Already in AUTO.LAND" << std::endl;
-    //     return false;
-    // }
     ros::Duration(2).sleep();
     while (ros::ok() && position_error.norm > utils::SMALL_DISTANCE_TOLERANCE) {
         expected_position = Eigen::Vector3f(0, 0, utils::DEFAULT_DISTANCE_TOLERANCE);
-        // std::cout << expected_position << std::endl;
         publish();
         ros::spinOnce();
         rate.sleep();
@@ -183,14 +177,15 @@ auto Mission::drone_arm() -> bool {
 }
 
 auto Mission::publish() -> void {
+    timeout_start_time = ros::Time::now();
     state.header.seq = seq_state++;
     state.header.stamp = ros::Time::now();
     state.target.position.x = expected_position.x();
     state.target.position.y = expected_position.y();
     state.target.position.z = expected_position.z();
-    // std::cout << "state.target.position.x: " << state.target.position.x << std::endl;
-    // std::cout << "state.target.position.y: " << state.target.position.y << std::endl;
-    // std::cout << "state.target.position.z: " << state.target.position.z << std::endl;
+    std::cout << "state.target.position.x: " << state.target.position.x << std::endl;
+    std::cout << "state.target.position.y: " << state.target.position.y << std::endl;
+    std::cout << "state.target.position.z: " << state.target.position.z << std::endl;
     pub_mission_state.publish(state);
 }
 
@@ -222,7 +217,7 @@ auto Mission::find_path(Eigen::Vector3f start, Eigen::Vector3f end)
         }
     }
 
-    auto arrow_msg_gen = mdi::utils::rviz::arrow_msg_gen::builder()
+    auto arrow_msg_gen = amr::utils::rviz::arrow_msg_gen::builder()
                              .arrow_head_width(0.02f)
                              .arrow_length(0.02f)
                              .arrow_width(0.02f)
@@ -230,7 +225,7 @@ auto Mission::find_path(Eigen::Vector3f start, Eigen::Vector3f end)
                              .build();
     arrow_msg_gen.header.frame_id = utils::FRAME_WORLD;
 
-    auto sphere_msg_gen = mdi::utils::rviz::sphere_msg_gen{};
+    auto sphere_msg_gen = amr::utils::rviz::sphere_msg_gen{};
     sphere_msg_gen.header.frame_id = utils::FRAME_WORLD;
 
     // ros::Duration(1).sleep();
@@ -315,25 +310,25 @@ auto Mission::exploration_step() -> bool {
         start_time = ros::Time::now();
     }
     delta_time = ros::Time::now() - start_time;
-    // std::cout << mdi::utils::GREEN << "Exploration step at: " << delta_time << mdi::utils::RESET
+    // std::cout << amr::utils::GREEN << "Exploration step at: " << delta_time << amr::utils::RESET
     // << std::endl; std::cout << "step_count: " << step_count << std::endl;
 
     // std::cout << "Interest points:" << std::endl;
     // for (auto& ip : interest_points) {
-    // std::cout << ip << std::endl;
+    //     std::cout << ip << std::endl;
     // }
 
     // std::cout << "waypoint_idx: " << waypoint_idx << std::endl;
 
     auto distance = delta_time.toSec() * velocity_target;
     auto remaining_distance = trajectory.get_length() - distance;
-    // std::cout << mdi::utils::MAGENTA << "distance: " << distance << mdi::utils::RESET <<
-    // std::endl; std::cout << mdi::utils::MAGENTA << "remaining_distance: " << remaining_distance
-    // << mdi::utils::RESET << std::endl;
+    // std::cout << amr::utils::MAGENTA << "distance: " << distance << amr::utils::RESET <<
+    // std::endl; std::cout << amr::utils::MAGENTA << "remaining_distance: " << remaining_distance
+    // << amr::utils::RESET << std::endl;
 
     // std::cout << "before if" << std::endl;
-    if (step_count == 0 || (remaining_distance < utils::SMALL_DISTANCE_TOLERANCE * 5 &&
-                            position_error.norm < utils::SMALL_DISTANCE_TOLERANCE * 5)) {
+    if (step_count == 0 || (remaining_distance < utils::SMALL_DISTANCE_TOLERANCE &&
+                            position_error.norm < utils::SMALL_DISTANCE_TOLERANCE)) {
         // std::cout << "inside if" << std::endl;
         if (waypoint_idx >= interest_points.size()) {
             // std::cout << waypoint_idx << std::endl;
@@ -362,7 +357,7 @@ auto Mission::exploration_step() -> bool {
     }
     // std::cout << "after if" << std::endl;
 
-    // std::cout << mdi::utils::GREEN << "delta_time: " << delta_time << mdi::utils::RESET <<
+    // std::cout << amr::utils::GREEN << "delta_time: " << delta_time << amr::utils::RESET <<
     // std::endl;
 
     // control the drone along the spline path
@@ -388,12 +383,12 @@ auto Mission::trajectory_step() -> bool {
     delta_time = ros::Time::now() - start_time;
     auto distance = delta_time.toSec() * velocity_target;
     auto remaining_distance = trajectory.get_length() - distance;
-    // std::cout << mdi::utils::GREEN << "distance: " << distance << mdi::utils::RESET << std::endl;
-    // std::cout << mdi::utils::GREEN << "remaining_distance: " << remaining_distance <<
-    // mdi::utils::RESET << std::endl;
+    // std::cout << amr::utils::GREEN << "distance: " << distance << amr::utils::RESET << std::endl;
+    // std::cout << amr::utils::GREEN << "remaining_distance: " << remaining_distance <<
+    // amr::utils::RESET << std::endl;
 
-    if (remaining_distance < utils::DEFAULT_DISTANCE_TOLERANCE * 3 &&
-        position_error.norm < utils::DEFAULT_DISTANCE_TOLERANCE * 3) {
+    if (remaining_distance < utils::DEFAULT_DISTANCE_TOLERANCE &&
+        position_error.norm < utils::DEFAULT_DISTANCE_TOLERANCE) {
         // std::cout << "end reached!" << std::endl;
         return true;
     }
@@ -507,4 +502,4 @@ auto Mission::state_to_string(enum state s) -> std::string {
     }
 }
 
-}  // namespace mdi
+}  // namespace amr

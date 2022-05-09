@@ -1,6 +1,6 @@
-#include "math.hpp"
+#include "utils/math.hpp"
 
-namespace mdi::utils {
+namespace amr::utils {
 //--------------------------------------------------------------------------------------------------
 // Return the factorial of `i`
 auto factorial(unsigned int i) -> uint64_t {
@@ -32,4 +32,4 @@ auto binomial_coefficient(int n, int i) -> int {
 
     return (factorial(n) / (factorial(i) * factorial(n - i)));
 }
-}  // namespace mdi::utils
+}  // namespace amr::utils

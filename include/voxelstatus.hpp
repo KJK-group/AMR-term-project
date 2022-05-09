@@ -1,7 +1,7 @@
 #pragma once
 
-namespace mdi {
+namespace amr {
 
 enum class VoxelStatus { Free, Occupied, Unknown };
 
-}  // namespace mdi
+}  // namespace amr

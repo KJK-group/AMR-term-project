@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for clangd
 
-
 find_package(
   catkin REQUIRED
   COMPONENTS std_msgs
@@ -29,7 +28,13 @@ include_directories(${catkin_INCLUDE_DIRS})
 find_package(Eigen3 REQUIRED)
 include_directories(${Eigen3_INCLUDE_DIRS})
 
+find_package(octomap REQUIRED)
+include_directories(${OCTOMAP_INCLUDE_DIRS})
+
+find_package(Boost REQUIRED COMPONENTS system)
+
 include_directories(include)
+add_subdirectory(libs/kdtree)
 
 add_message_files(
   DIRECTORY
@@ -58,15 +63,15 @@ function(add_ros_executable name main)
   )
 endfunction(add_ros_executable)
 
+function(add_ros_dependencies target)
+  add_dependencies(${target} ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                   ${catkin_EXPORTED_TARGETS})
+endfunction(add_ros_dependencies)
+
 # add_ros_executable(mission_manager src/nodes/mission_manager.cpp)
 add_ros_executable(pid_controller src/nodes/pid_controller.cpp)
 target_sources(pid_controller PUBLIC src/transformlistener.cpp)
-
-# add_library(bezier_spline SHARED src/bezier_spline.cpp)
-# target_sources(bezier_spline PUBLIC src/math.cpp)
-# add_library(rrt SHARED src/rrt/rrt.cpp)
-# target_link_libraries(rrt   ${catkin_LIBRARIES} fmt::fmt-header-only
-#                       kdtree-header-only) 
+add_ros_executable(map_to_odom_tf_broadcaster src/nodes/map_to_odom_tf_broadcaster.cpp)
 
 # Libraries
 add_library(bezier_spline SHARED src/bezier_spline.cpp)
@@ -75,8 +80,7 @@ target_sources(bezier_spline PUBLIC src/math.cpp)
 add_library(linear_trajectory SHARED src/linear_trajectory.cpp)
 
 add_library(rrt SHARED src/rrt.cpp)
-target_link_libraries(rrt ${catkin_LIBRARIES} fmt::fmt-header-only
-                      kdtree-header-only)
+target_link_libraries(rrt ${catkin_LIBRARIES} kdtree-header-only)
 
 add_library(compound_trajectory SHARED src/compound_trajectory.cpp)
 target_link_libraries(compound_trajectory bezier_spline linear_trajectory rrt)
@@ -84,6 +88,12 @@ target_link_libraries(compound_trajectory bezier_spline linear_trajectory rrt)
 add_library(mission SHARED src/mission.cpp)
 target_link_libraries(mission compound_trajectory rrt)
 
+# executables using libraries
+add_executable(rrt_service src/nodes/rrt_service.cpp)
+add_ros_dependencies(rrt_service)
+# target_compile_options(rrt_service PRIVATE -O0 -g)
+target_compile_options(rrt_service PRIVATE -O2 -g)
+target_link_libraries(rrt_service ${catkin_LIBRARIES} rrt kdtree-header-only ${OCTOMAP_LIBRARIES})
 
 # add_ros_executable(mission_manager src/mission_manager.cpp)
 add_executable(mission_manager src/nodes/mission_manager.cpp)
@@ -91,7 +101,3 @@ add_dependencies(mission_manager ${${PROJECT_NAME}_EXPORTED_TARGETS}
 ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mission_manager ${catkin_LIBRARIES} mission)
 target_compile_options(mission_manager PRIVATE -g)
-
-# add_executable(${PROJECT_NAME} src/main.cpp)
-# target_sources(src/*.cpp)
-# target_compile_options(${PROJECT_NAME} PUBLIC -O2 -std=c++17 -Wall -Werror)

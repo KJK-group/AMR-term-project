@@ -3,7 +3,7 @@
 #include <iostream>
 #include <utility>
 
-namespace mdi::trajectory {
+namespace amr::trajectory {
 LinearTrajectory::LinearTrajectory(Eigen::Vector3f start, Eigen::Vector3f end)
     : start(std::move(start)), end(std::move(end)) {
     length = (end - start).norm();
@@ -20,4 +20,4 @@ auto LinearTrajectory::get_point_at_distance(float distance) -> Eigen::Vector3f 
     auto diff_vec = end - start;
     return start + f * diff_vec;
 }
-}  // namespace mdi::trajectory
+}  // namespace amr::trajectory

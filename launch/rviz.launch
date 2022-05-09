@@ -1,0 +1,3 @@
+<launch>
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find amr_term_project)/rviz/path.rviz" />
+</launch>

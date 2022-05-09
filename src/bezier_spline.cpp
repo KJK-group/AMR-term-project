@@ -1,8 +1,8 @@
-#include "mdi/bezier_spline.hpp"
+#include "bezier_spline.hpp"
 
 #include <iostream>
 
-namespace mdi::trajectory {
+namespace amr::trajectory {
 //--------------------------------------------------------------------------------------------------
 // Constructor; generates the spline the first time,
 // calling generate_spline with `points` and `resolution`
@@ -158,7 +158,7 @@ auto BezierSpline::generate_binomial_lut() -> void {
 
     for (int i = 0; i < this->size; i++) {
         // std::cout << "idx: " << i << std::endl;
-        binomial_lut.push_back(mdi::utils::binomial_coefficient(this->size, i));
+        binomial_lut.push_back(amr::utils::binomial_coefficient(this->size, i));
     }
     // std::cerr << "[DEBUG] " << __FILE__ << ":" << __LINE__ << ": "
     //   << " after for loop" << '\n';
@@ -250,4 +250,4 @@ auto BezierSpline::get_length() -> float {
         return 0;
     }
 }
-}  // namespace mdi::trajectory
+}  // namespace amr::trajectory

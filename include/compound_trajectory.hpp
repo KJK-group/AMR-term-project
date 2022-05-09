@@ -5,6 +5,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <eigen3/Eigen/Dense>
 #include <limits>
@@ -16,7 +17,7 @@
 #include "linear_trajectory.hpp"
 #include "utils/utils.hpp"
 
-namespace mdi::trajectory {
+namespace amr::trajectory {
 constexpr auto MARKER_SCALE = 0.1f;
 
 using Trajectory = std::variant<BezierSpline, LinearTrajectory>;
@@ -38,5 +39,5 @@ class CompoundTrajectory {
     ros::Publisher pub_visualisation;
     int seq_marker;
 };
-}  // namespace mdi::trajectory
+}  // namespace amr::trajectory
 #endif  // _MDI_TRAJECTORY_HPP_

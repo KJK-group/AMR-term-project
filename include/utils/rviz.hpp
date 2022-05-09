@@ -14,7 +14,7 @@
 #include "utils/time.hpp"
 #include "visualization_msgs/MarkerArray.h"
 
-namespace mdi::utils::rviz {
+namespace amr::utils::rviz {
 
 struct RGBA {
     float r, g, b = 0.f, a = 1.f;
@@ -72,7 +72,7 @@ struct visualization_marker_msg_gen {
     }
     auto get_id() -> decltype(id) { return auto_incrementing_id ? ++id : id; }
     auto append_epoch_suffix_if_enabled(const std::string& ns) -> std::string {
-        const auto namespace_id_suffix = mdi::utils::time::get_seconds_since_epoch();
+        const auto namespace_id_suffix = amr::utils::time::get_seconds_since_epoch();
         return ns + (use_namespace_id_suffix ? "/" + std::to_string(namespace_id_suffix) : "");
     }
 };
@@ -227,6 +227,6 @@ struct text_msg_gen : public visualization_marker_msg_gen {
     }
 };
 
-}  // namespace mdi::utils::rviz
+}  // namespace amr::utils::rviz
 
 #endif  // _MULTI_DRONE_INSPECTION_RVIZ_HPP_

@@ -1,6 +1,6 @@
-#include "mdi/rrt.hpp"
+#include "rrt.hpp"
 
-#include <fmt/core.h>
+// #include <fmt/core.h>
 #include <ros/console.h>
 #include <unistd.h>
 
@@ -31,7 +31,7 @@
 #include "utils/random.hpp"
 #include "utils/rosparam.hpp"
 
-namespace mdi::rrt {
+namespace amr::rrt {
 
 auto RRT::run() -> std::optional<waypoints_type> {
     // TODO: enable
@@ -78,7 +78,7 @@ auto RRT::get_frontier_nodes() const -> std::vector<vec3> {
 RRT::RRT(const vec3& start_position, const vec3& goal_position, float step_size, float goal_bias,
          std::size_t max_iterations, float max_dist_goal_tolerance,
          float probability_of_testing_full_path_from_new_node_to_goal) {
-    // : octomap_(std::make_unique<mdi::Octomap>()) {
+    // : octomap_(std::make_unique<amr::Octomap>()) {
     {
         start_position_ = start_position;
         goal_position_ = goal_position;
@@ -467,7 +467,7 @@ auto RRT::grow_() -> bool {
 
     // const auto edge_between_u_and_v_intersects_a_occupied_voxel = [this](const auto& u, const
     // auto& v) {
-    //     const auto convert_to_pt = [](const auto& v) -> mdi::Octomap::point_type { return {v.x(),
+    //     const auto convert_to_pt = [](const auto& v) -> amr::Octomap::point_type { return {v.x(),
     //     v.y(), v.z()};
     //     };
     //     // if opt is the some variant, then it means that a occupied voxel was hit.
@@ -808,7 +808,7 @@ auto RRT::collision_free_(const vec3& from, const vec3& to, float x, float y, fl
     const float raycast_length = direction.norm() + 2 * x;
 
     const auto raycast = [&](const vec3& v) {
-        static constexpr auto convert_to_pt = [](const auto& v) -> mdi::Octomap::point_type {
+        static constexpr auto convert_to_pt = [](const auto& v) -> amr::Octomap::point_type {
             return {v.x(), v.y(), v.z()};
         };
 
@@ -915,7 +915,7 @@ auto RRT::from_builder() -> RRTBuilder { return {}; }
 
 auto RRT::from_rosparam(std::string_view prefix) -> RRT {
     const auto prepend_prefix = [&](std::string_view key) {
-        return fmt::format("{}/{}", prefix, key);
+        return std::string(prefix) + "/" + std::string(key);
     };
 
     const auto get_int = [&](std::string_view key) {
@@ -924,7 +924,8 @@ auto RRT::from_rosparam(std::string_view prefix) -> RRT {
             return default_value;
         }
 
-        const auto error_msg = fmt::format("key {} does not exist in the parameter server.", key);
+        const auto error_msg =
+            "key " + std::string(key) + " does not exist in the parameter server.";
         throw std::invalid_argument(error_msg);
     };
 
@@ -935,7 +936,8 @@ auto RRT::from_rosparam(std::string_view prefix) -> RRT {
             return default_value;
         }
 
-        const auto error_msg = fmt::format("key {} does not exist in the parameter server.", key);
+        const auto error_msg =
+            "key " + std::string(key) + " does not exist in the parameter server.";
         throw std::invalid_argument(error_msg);
     };
 
@@ -951,7 +953,8 @@ auto RRT::from_rosparam(std::string_view prefix) -> RRT {
             return vec3{x, y, z};
         }
 
-        const auto error_msg = fmt::format("key {} does not exist in the parameter server.", key);
+        const auto error_msg =
+            "key " + std::string(key) + " does not exist in the parameter server.";
         throw std::invalid_argument(error_msg);
     };
 
@@ -981,9 +984,10 @@ RRT::~RRT() {
                     return static_cast<std::uint32_t>(
                         duration_cast<seconds>(now.time_since_epoch()).count());
                 }();
-                const auto fmt_str = file_path_csv_.stem().string() + "-{}" + ".csv";
+                const auto fmt_str = file_path_csv_.stem().string() + "-" +
+                                     std::string(unix_timestamp) + "" + ".csv";
 
-                return std::filesystem::path(fmt::format(fmt_str, unix_timestamp));
+                return std::filesystem::path(fmt_str));
             }
 
             return file_path_csv_;
@@ -1037,4 +1041,4 @@ std::ostream& operator<<(std::ostream& os, const RRT& rrt) {
     return os;
 }
 
-}  // namespace mdi::rrt
+}  // namespace amr::rrt

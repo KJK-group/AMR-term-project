@@ -12,22 +12,22 @@
 #include <memory>
 
 #include "amr_term_project/RrtFindPath.h"
-#include "mdi/common_headers.hpp"
-#include "mdi/octomap.hpp"
-#include "mdi/rrt/rrt.hpp"
-#include "mdi/rrt/rrt_builder.hpp"
-#include "mdi/utils/rviz/rviz.hpp"
+#include "octomap.hpp"
 #include "octomap/octomap_types.h"
 #include "ros/duration.h"
 #include "ros/init.h"
 #include "ros/publisher.h"
 #include "ros/service_client.h"
 #include "ros/service_server.h"
+#include "rrt.hpp"
+#include "rrt_builder.hpp"
+#include "utils/common_headers.hpp"
+#include "utils/rviz.hpp"
 
 using namespace std::string_literals;
 using vec3 = Eigen::Vector3f;
 
-using mdi::Octomap;
+using amr::Octomap;
 
 // use ptr to forward declare cause otherwise we have to call their constructor,
 // which is not allowed before ros::init(...)
@@ -40,12 +40,12 @@ waypoint_cb before_waypoint_optimization;
 waypoint_cb after_waypoint_optimization;
 raycast_cb raycast;
 
-auto call_get_octomap() -> mdi::Octomap* {
+auto call_get_octomap() -> amr::Octomap* {
     auto request = octomap_msgs::GetOctomap::Request{};  // empty request
     auto response = octomap_msgs::GetOctomap::Response{};
 
     get_octomap_client->call(request, response);
-    return response.map.data.size() == 0 ? nullptr : new mdi::Octomap{response.map};
+    return response.map.data.size() == 0 ? nullptr : new amr::Octomap{response.map};
 }
 
 /**
@@ -81,14 +81,14 @@ auto call_clear_region_of_octomap(const octomap::point3d& max, const octomap::po
 
 auto rrt_find_path_handler(amr_term_project::RrtFindPath::Request& request,
                            amr_term_project::RrtFindPath::Response& response) -> bool {
-    const auto convert = [](const auto& pt) -> mdi::rrt::vec3 {
+    const auto convert = [](const auto& pt) -> amr::rrt::vec3 {
         return {static_cast<float>(pt.x), static_cast<float>(pt.y), static_cast<float>(pt.z)};
     };
 
     const auto start = convert(request.start);
     const auto goal = convert(request.goal);
 
-    auto rrt = mdi::rrt::RRT::from_builder()
+    auto rrt = amr::rrt::RRT::from_builder()
                    .start_and_goal_position(start, goal)
                    .max_iterations(request.max_iterations)
                    .goal_bias(request.goal_bias)
@@ -146,7 +146,7 @@ auto main(int argc, char* argv[]) -> int {
         return nh.advertise<visualization_msgs::Marker>(service_name, 10);
     }());
 
-    auto before_waypoint_optimization_arrow_msg_gen = mdi::utils::rviz::arrow_msg_gen::builder()
+    auto before_waypoint_optimization_arrow_msg_gen = amr::utils::rviz::arrow_msg_gen::builder()
                                                           .arrow_head_width(0.02f)
                                                           .arrow_length(0.02f)
                                                           .arrow_width(0.02f)
@@ -162,7 +162,7 @@ auto main(int argc, char* argv[]) -> int {
 
     ros::Duration(2).sleep();
 
-    auto after_waypoint_optimization_arrow_msg_gen = mdi::utils::rviz::arrow_msg_gen::builder()
+    auto after_waypoint_optimization_arrow_msg_gen = amr::utils::rviz::arrow_msg_gen::builder()
                                                          .arrow_head_width(0.5f)
                                                          .arrow_length(0.02f)
                                                          .arrow_width(1.f)
@@ -177,7 +177,7 @@ auto main(int argc, char* argv[]) -> int {
     };
 
     ros::Duration(2).sleep();
-    auto raycast_arrow_msg_gen = mdi::utils::rviz::arrow_msg_gen::builder()
+    auto raycast_arrow_msg_gen = amr::utils::rviz::arrow_msg_gen::builder()
                                      .arrow_head_width(0.15f)
                                      .arrow_length(0.3f)
                                      .arrow_width(0.05f)

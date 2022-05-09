@@ -20,24 +20,26 @@
 #include "amr_term_project/RrtFindPath.h"
 #include "compound_trajectory.hpp"
 #include "nav_msgs/Odometry.h"
-#include "rrt/rrt.hpp"
-#include "rrt/rrt_builder.hpp"
-#include "utils/rviz/rviz.hpp"
+#include "rrt.hpp"
+#include "rrt_builder.hpp"
+#include "utils/rviz.hpp"
 #include "utils/utils.hpp"
 
-namespace mdi {
+namespace amr {
 constexpr auto INITIAL_ALTITUDE = 5;
+constexpr auto MISSION_TIMEOUT = 40;
 class Mission {
    public:
     Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target = 1,
-            Eigen::Vector3f home = {0, 0, INITIAL_ALTITUDE}, bool visualise = false);
+            Eigen::Vector3f home = {0, 0, INITIAL_ALTITUDE}, int timeout_seconds = MISSION_TIMEOUT,
+            bool visualise = false);
     enum state { PASSIVE, HOME, EXPLORATION, INSPECTION, LAND };
     static auto state_to_string(enum state s) -> std::string;
     auto add_interest_point(Eigen::Vector3f interest_point) -> void;
 
     auto get_drone_state() -> mavros_msgs::State;
     auto get_trajectory() -> trajectory::CompoundTrajectory;
-    auto drone_takeoff(float altitude = INITIAL_ALTITUDE) -> bool;
+    auto drone_takeoff(float altitude = -1) -> bool;
     auto drone_land() -> bool;
     auto drone_arm() -> bool;
     auto run() -> void;
@@ -118,5 +120,5 @@ class Mission {
     float marker_scale;
     bool visualise;
 };
-}  // namespace mdi
+}  // namespace amr
 #endif  // _MDI_MISSION_MANAGER_HPP_

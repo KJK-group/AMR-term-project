@@ -8,11 +8,11 @@
 #include <tuple>
 #include <vector>
 
-namespace mdi::utils {
+namespace amr::utils {
 
 constexpr auto DEFAULT_QUEUE_SIZE = 10;
-constexpr auto FRAME_WORLD = "world_enu";          // world/global frame
-constexpr auto FRAME_BODY = "PX4/odom_local_ned";  // drone body frame
+constexpr auto FRAME_WORLD = "map";  // world/global frame
+constexpr auto FRAME_BODY = "odom";  // drone body frame
 constexpr auto REQUEST_TIMEOUT = 5;
 constexpr auto SMALL_DISTANCE_TOLERANCE = 0.1;
 constexpr auto DEFAULT_DISTANCE_TOLERANCE = 0.15;
@@ -65,6 +65,6 @@ auto range(int start, int end) -> std::vector<int> {
 
 // 	return result;
 // }
-}  // namespace mdi::utils
+}  // namespace amr::utils
 
 #endif  // _MDI_UTILS_HPP_

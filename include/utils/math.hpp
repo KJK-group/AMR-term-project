@@ -7,7 +7,7 @@
 #include <functional>
 #include <iostream>
 
-namespace mdi::utils {
+namespace amr::utils {
 using Eigen::Vector3f;
 using std::uint64_t;
 
@@ -34,6 +34,6 @@ inline auto angle_representation(float theta) -> float {
     }
 }
 
-}  // namespace mdi::utils
+}  // namespace amr::utils
 
 #endif  // _MULTI_DRONE_INSPECTION_MATH_HPP_

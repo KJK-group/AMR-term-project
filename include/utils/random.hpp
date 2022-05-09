@@ -12,7 +12,7 @@
 #include <iostream>
 #include <random>
 
-namespace mdi::utils::random {
+namespace amr::utils::random {
 
 using Eigen::AngleAxisf;
 using Eigen::Vector2f;
@@ -41,7 +41,7 @@ struct random_point_generator {
 
     auto get_bias_rotation_interval(float bias) -> float {
 #ifndef NDEBUG
-        if (!(0.f < bias && bias < 1.f)) {
+        if (! (0.f < bias && bias < 1.f)) {
             throw std::invalid_argument("bias must be between 0 and 1");
         }
 #endif
@@ -283,6 +283,6 @@ struct random_point_generator {
 //     return sample_random_point_inside_unit_sphere(direction, bias, bias, bias);
 // }
 
-}  // namespace mdi::utils::random
+}  // namespace amr::utils::random
 
 #endif  // _MULTI_DRONE_INSPECTION_RANDOM_HPP_

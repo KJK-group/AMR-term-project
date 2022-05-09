@@ -10,7 +10,7 @@
 #include "utils/common_headers.hpp"
 #include "voxelstatus.hpp"
 
-namespace mdi {
+namespace amr {
 
 class Octomap final {
    public
@@ -167,7 +167,7 @@ class Octomap final {
 
         return std::nullopt;
     }
-};  // namespace mdi
+};  // namespace amr
 
 // std::ostream& operator<<(std::ostream& os, const Octomap& octomap) {
 // os << "octomap:\n";
@@ -185,4 +185,4 @@ class Octomap final {
 // return os;
 // }
 
-}  // namespace mdi
+}  // namespace amr
