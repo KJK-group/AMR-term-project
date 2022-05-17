@@ -101,9 +101,9 @@ auto rrt_find_path_handler(amr_term_project::RrtFindPath::Request& request,
     // rrt.register_cb_for_event_on_new_node_created(
     // [](const auto& p1, const auto& p2) { std::cout << "New node created" << '\n'; });
 
-    rrt.register_cb_for_event_before_optimizing_waypoints(before_waypoint_optimization);
-    rrt.register_cb_for_event_after_optimizing_waypoints(after_waypoint_optimization);
-    rrt.register_cb_for_event_on_raycast(raycast);
+    // rrt.register_cb_for_event_before_optimizing_waypoints(before_waypoint_optimization);
+    // rrt.register_cb_for_event_after_optimizing_waypoints(after_waypoint_optimization);
+    // rrt.register_cb_for_event_on_raycast(raycast);
 
     auto success = false;
 

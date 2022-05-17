@@ -175,7 +175,7 @@ auto BezierSpline::get_point_at_time(float time) -> Vector3f {
 // Returns the point at the `distance` along the spline
 auto BezierSpline::get_point_at_distance(float distance) -> Vector3f {
     // assume distance is greater not negative
-    assert(distance >= 0);
+    // assert(distance >= 0);
     // std::cout << "distance = " << distance << std::endl;
     distance = this->distance_lut[this->distance_lut.size() - 1] - distance;
     if (distance < 0) {

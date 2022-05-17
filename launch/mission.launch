@@ -10,6 +10,8 @@
     <arg name="kai" default="0"/>
     <arg name="kad" default="0"/>
     <arg name="vel" default="0"/>
+    <!-- topic -->
+    <arg name="vicon" default="0"/>
 
     <!-- <arg name="lp" default="valgrind"/> -->
     <arg name="lp" default=""/>

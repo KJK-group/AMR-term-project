@@ -155,7 +155,9 @@ auto main(int argc, char** argv) -> int {
         auto command_velocity = pid_command_from_error(error);
 
         // publish velocity control command
-        pub_velocity.publish(command_velocity);
+        if (state.state != 4) {
+            pub_velocity.publish(command_velocity);
+        }
         // publish error
         amr_term_project::PointNormStamped error_msg;
         error_msg.header.seq = seq_error++;

@@ -440,6 +440,7 @@ auto RRT::insert_node_(const vec3& pos, node_t* parent) -> node_t& {
 }
 
 auto RRT::grow_() -> bool {
+    std::cout << "remaining iterations:" << remaining_iterations_ << std::endl;
     if (! (remaining_iterations_ > 0)) {
         return false;
     }

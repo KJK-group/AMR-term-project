@@ -29,6 +29,9 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
                                                        &Mission::state_cb, this);
     sub_position_error = nh.subscribe<amr_term_project::PointNormStamped>(
         "/amr/mission/error", utils::DEFAULT_QUEUE_SIZE, &Mission::error_cb, this);
+    // odom subscriber
+    sub_odom = nh.subscribe<nav_msgs::Odometry>(
+        "/mavros/local_position/odom", amr::utils::DEFAULT_QUEUE_SIZE, &Mission::odom_cb, this);
 
     // services
     client_arm = nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
@@ -88,12 +91,12 @@ auto Mission::drone_takeoff(float altitude) -> bool {
     }
 
     ros::Duration(2).sleep();
-    while (ros::ok() && position_error.norm > utils::SMALL_DISTANCE_TOLERANCE) {
-        expected_position = Eigen::Vector3f(0, 0, utils::DEFAULT_DISTANCE_TOLERANCE);
-        publish();
-        ros::spinOnce();
-        rate.sleep();
-    }
+    // while (ros::ok() && position_error.norm > utils::SMALL_DISTANCE_TOLERANCE) {
+    //     expected_position = Eigen::Vector3f(0, 0, utils::DEFAULT_DISTANCE_TOLERANCE);
+    //     publish();
+    //     ros::spinOnce();
+    //     rate.sleep();
+    // }
 
     auto altitude_reached = false;
     start_time = ros::Time::now();
@@ -421,11 +424,22 @@ auto Mission::go_home() -> void {
     }
 }
 
+auto Mission::outside() -> bool {
+    auto pos = drone_odom.pose.pose.position;
+    if (pos.x > 6 || pos.y < -6 || pos.y > 6 || pos.y < -6 || pos.z > 3) {
+        return true;
+    }
+    return false;
+}
+
 auto Mission::run_step() -> void {
     timeout_delta_time = ros::Time::now() - timeout_start_time;
     if (timeout_delta_time > timeout) {
         // std::cout << "Mission timed out" << std::endl;
         end();
+    }
+    if (outside()) {
+        set_state(LAND);
     }
 
     switch (state.state) {

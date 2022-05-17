@@ -12,12 +12,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for clangd
 find_package(octomap REQUIRED)
 include_directories(${OCTOMAP_INCLUDE_DIRS})
 
-add_executable(create_octomap_of_airlab_cage
-               src/create_octomap_of_airlab_cage.cpp)
-target_link_libraries(create_octomap_of_airlab_cage ${OCTOMAP_LIBRARIES})
-target_compile_options(create_octomap_of_airlab_cage PUBLIC -O2 -std=c++17
-                                                            -Wall -Werror)
-
 find_package(
   catkin REQUIRED
   COMPONENTS std_msgs
@@ -109,3 +103,11 @@ add_dependencies(mission_manager ${${PROJECT_NAME}_EXPORTED_TARGETS}
 ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mission_manager ${catkin_LIBRARIES} mission)
 target_compile_options(mission_manager PRIVATE -g)
+
+add_executable(create_octomap_of_airlab_cage
+               src/create_octomap_of_airlab_cage.cpp)
+target_link_libraries(create_octomap_of_airlab_cage ${OCTOMAP_LIBRARIES})
+target_compile_options(create_octomap_of_airlab_cage PUBLIC -O2 -std=c++17
+                                                            -Wall -Werror)
+
+add_ros_executable(set_point_node src/nodes/set_point_node.cpp)

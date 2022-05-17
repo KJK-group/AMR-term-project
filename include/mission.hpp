@@ -65,6 +65,8 @@ class Mission {
     auto error_cb(const amr_term_project::PointNormStamped::ConstPtr& error) -> void;
     auto odom_cb(const nav_msgs::Odometry::ConstPtr& odom) -> void;
 
+    auto outside() -> bool;
+
     ros::NodeHandle& nh;
     ros::Rate& rate;
     amr_term_project::MissionStateStamped state;
@@ -79,6 +81,7 @@ class Mission {
     // subscribers
     ros::Subscriber sub_drone_state;
     ros::Subscriber sub_position_error;
+    ros::Subscriber sub_odom;
 
     // services
     ros::ServiceClient client_arm;
