@@ -13,8 +13,6 @@ namespace utils::transform {
 
 class TransformListener {
    public:
-    TransformListener() = default;
-    TransformListener(const TransformListener&) = default;
 
     auto lookup_tf(const std::string& to_frame, const std::string& from_frame,
                    ros::Time time = ros::Time(0)) -> std::optional<geometry_msgs::TransformStamped>;

@@ -39,7 +39,7 @@ class Mission {
     static auto state_to_string(enum state s) -> std::string;
     auto add_interest_point(Eigen::Vector3f interest_point) -> void;
 
-    auto get_drone_state() -> mavros_msgs::State;
+    // auto get_drone_state() -> mavros_msgs::State;
     auto get_trajectory() -> trajectory::CompoundTrajectory;
     auto drone_takeoff(float altitude = -1) -> bool;
     auto drone_land() -> bool;
@@ -84,7 +84,7 @@ class Mission {
     ros::Publisher pub_setpoint;
 
     // subscribers
-    ros::Subscriber sub_drone_state;
+    // ros::Subscriber sub_drone_state;
     ros::Subscriber sub_position_error;
     ros::Subscriber sub_odom;
 
@@ -96,7 +96,7 @@ class Mission {
     ros::ServiceClient client_rrt;
 
     // msg instances
-    mavros_msgs::State drone_state;
+    // mavros_msgs::State drone_state;
     nav_msgs::Odometry drone_odom;
     amr_term_project::ControllerStateStamped controller_state;
 

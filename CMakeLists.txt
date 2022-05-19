@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 project(
   amr_term_project
   VERSION 0.1.0
@@ -78,7 +78,7 @@ add_ros_executable(map_to_odom_tf_broadcaster src/nodes/map_to_odom_tf_broadcast
 
 # Libraries
 add_library(bezier_spline SHARED src/bezier_spline.cpp)
-target_sources(bezier_spline PUBLIC src/math.cpp)
+target_sources(bezier_spline PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/math.cpp)
 
 add_library(linear_trajectory SHARED src/linear_trajectory.cpp)
 
@@ -93,7 +93,7 @@ target_link_libraries(mission compound_trajectory rrt)
 
 # control library
 add_library(control SHARED src/pid_controller.cpp)
-target_sources(control PUBLIC src/transformlistener.cpp)
+# target_sources(control PUBLIC src/transformlistener.cpp)
 
 # add_ros_executable(mission_manager src/nodes/mission_manager.cpp)
 add_executable(control_manager src/nodes/control_manager.cpp)

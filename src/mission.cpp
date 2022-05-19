@@ -28,8 +28,8 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, Eigen::Vector2f target,
                                                             utils::DEFAULT_QUEUE_SIZE);
 
     // subscribers
-    sub_drone_state = nh.subscribe<mavros_msgs::State>("/mavros/state", utils::DEFAULT_QUEUE_SIZE,
-                                                       &Mission::state_cb, this);
+    // sub_drone_state = nh.subscribe<mavros_msgs::State>("/mavros/state", utils::DEFAULT_QUEUE_SIZE,
+    //                                                    &Mission::state_cb, this);
     sub_position_error = nh.subscribe<amr_term_project::ControllerStateStamped>(
         "/amr/controller/state", utils::DEFAULT_QUEUE_SIZE, &Mission::controller_state_cb, this);
     // odom subscriber
@@ -37,7 +37,7 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, Eigen::Vector2f target,
         "/mavros/local_position/odom", amr::utils::DEFAULT_QUEUE_SIZE, &Mission::odom_cb, this);
 
     // services
-    client_arm = nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
+    // client_arm = nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
     client_mode = nh.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
     client_land = nh.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/land");
     client_takeoff = nh.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
@@ -63,7 +63,7 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, Eigen::Vector2f target,
     // trajectory = trajectory::CompoundTrajectory(nh, rate, {{0, 0, 0}, home_position});
 }
 
-auto Mission::state_cb(const mavros_msgs::State::ConstPtr& state) -> void { drone_state = *state; }
+// auto Mission::state_cb(const mavros_msgs::State::ConstPtr& state) -> void { drone_state = *state; }
 auto Mission::controller_state_cb(const amr_term_project::ControllerStateStamped::ConstPtr& state)
     -> void {
     controller_state = *state;
@@ -86,7 +86,7 @@ auto Mission::compute_attitude() -> void {
 auto Mission::add_interest_point(Eigen::Vector3f interest_point) -> void {
     interest_points.push_back(interest_point);
 }
-auto Mission::get_drone_state() -> mavros_msgs::State { return drone_state; }
+// auto Mission::get_drone_state() -> mavros_msgs::State { return drone_state; }
 auto Mission::get_trajectory() -> trajectory::CompoundTrajectory { return trajectory; }
 
 auto Mission::set_state(enum state s) -> void {
@@ -156,7 +156,7 @@ auto Mission::drone_land() -> bool {
     state.state = LAND;
     mavros_msgs::CommandTOL land_msg;
 
-    while (ros::ok() && drone_state.mode != "AUTO.LAND") {
+    while (ros::ok() /* && drone_state.mode != "AUTO.LAND" */) {
         success = (client_land.call(land_msg)) ? true : false;
         publish();
         ros::spinOnce();
@@ -172,7 +172,7 @@ auto Mission::drone_set_mode(std::string mode) -> bool {
     mavros_msgs::SetMode mode_msg{};
     mode_msg.request.custom_mode = mode;
 
-    while (ros::ok() && drone_state.mode != mode) {
+    while (ros::ok() /* && drone_state.mode != mode */) {
         success = (client_mode.call(mode_msg) && mode_msg.response.mode_sent) ? true : false;
         publish();
         ros::spinOnce();
@@ -187,7 +187,7 @@ auto Mission::drone_arm() -> bool {
     mavros_msgs::CommandBool srv{};
     srv.request.value = true;
 
-    while (ros::ok() && ! drone_state.armed) {
+    while (ros::ok() /* && ! drone_state.armed */) {
         success = (client_arm.call(srv)) ? true : false;
         publish();
         ros::spinOnce();
@@ -503,8 +503,8 @@ auto Mission::run_step() -> void {
 
     switch (state.state) {
         case PASSIVE:
-            drone_set_mode();
-            drone_arm();
+            // drone_set_mode();
+            // drone_arm();
             set_state(HOME);
             break;
         case HOME:
