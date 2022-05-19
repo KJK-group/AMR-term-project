@@ -114,7 +114,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /mdi/paths/estimated
+      Topic: /amr/paths/estimated
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -138,12 +138,12 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /mdi/paths/target
+      Topic: /amr/paths/target
       Unreliable: false
       Value: false
     - Class: rviz/Marker
       Enabled: false
-      Marker Topic: /mdi/visualisation_marker
+      Marker Topic: /amr/visualisation_marker
       Name: Marker
       Namespaces:
         {}
@@ -163,7 +163,7 @@ Visualization Manager:
       Voxel Rendering: Occupied Voxels
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /mdi/visualisation
+      Marker Topic: /amr/visualisation
       Name: MarkerArray
       Namespaces:
         "": true

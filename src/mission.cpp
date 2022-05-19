@@ -1,25 +1,28 @@
 #include "mission.hpp"
 
 namespace amr {
-Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Eigen::Vector3f home,
-                 int timeout_seconds, bool visualise)
+Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, Eigen::Vector2f target,
+                 float velocity_target, Eigen::Vector3f home, int timeout_seconds, bool visualise)
     : inspection_complete(false),
       exploration_complete(false),
       step_count(0),
       seq_point(0),
       seq_state(0),
+      seq_vis(0),
       waypoint_idx(1),
       velocity_target(velocity_target),
       rate(rate),
       nh(nh),
       home_position(std::move(home)),
       marker_scale(0.1),
-      visualise(visualise),
-      trajectory({nh, rate, {{0, 0, 0}, home_position}, visualise}) {
+      should_visualise(visualise),
+      trajectory({nh, rate, {{0, 0, 0}, home_position}, visualise}),
+      target(target),
+      object_center(target) {
     // publishers
     pub_mission_state = nh.advertise<amr_term_project::MissionStateStamped>(
         "/amr/mission/state", utils::DEFAULT_QUEUE_SIZE);
-    pub_visualise = nh.advertise<visualization_msgs::Marker>("/mdi/visualisation_marker",
+    pub_visualise = nh.advertise<visualization_msgs::Marker>("/amr/visualisation_marker",
                                                              utils::DEFAULT_QUEUE_SIZE);
     pub_setpoint = nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_local/local",
                                                             utils::DEFAULT_QUEUE_SIZE);
@@ -27,8 +30,8 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
     // subscribers
     sub_drone_state = nh.subscribe<mavros_msgs::State>("/mavros/state", utils::DEFAULT_QUEUE_SIZE,
                                                        &Mission::state_cb, this);
-    sub_position_error = nh.subscribe<amr_term_project::PointNormStamped>(
-        "/amr/mission/error", utils::DEFAULT_QUEUE_SIZE, &Mission::error_cb, this);
+    sub_position_error = nh.subscribe<amr_term_project::ControllerStateStamped>(
+        "/amr/controller/state", utils::DEFAULT_QUEUE_SIZE, &Mission::controller_state_cb, this);
     // odom subscriber
     sub_odom = nh.subscribe<nav_msgs::Odometry>(
         "/mavros/local_position/odom", amr::utils::DEFAULT_QUEUE_SIZE, &Mission::odom_cb, this);
@@ -38,7 +41,7 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
     client_mode = nh.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
     client_land = nh.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/land");
     client_takeoff = nh.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
-    client_rrt = nh.serviceClient<amr_term_project::RrtFindPath>("/mdi/rrt_service/find_path");
+    client_rrt = nh.serviceClient<amr_term_project::RrtFindPath>("/amr/rrt_service/find_path");
 
     // time
     start_time = ros::Time::now();
@@ -61,10 +64,24 @@ Mission::Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target, Ei
 }
 
 auto Mission::state_cb(const mavros_msgs::State::ConstPtr& state) -> void { drone_state = *state; }
-auto Mission::error_cb(const amr_term_project::PointNormStamped::ConstPtr& error) -> void {
-    position_error = *error;
+auto Mission::controller_state_cb(const amr_term_project::ControllerStateStamped::ConstPtr& state)
+    -> void {
+    controller_state = *state;
 }
 auto Mission::odom_cb(const nav_msgs::Odometry::ConstPtr& odom) -> void { drone_odom = *odom; }
+
+auto Mission::compute_attitude() -> void {
+    auto pos = drone_odom.pose.pose.position;
+
+    // std::cout << "target:\n" << target_ << std::endl;
+    auto diff_x = target.x() - pos.x;
+    auto diff_y = target.y() - pos.y;
+    auto expected_yaw = std::atan2(diff_y, diff_x);
+
+    tf2::Quaternion quat;
+    quat.setRPY(0, 0, expected_yaw);
+    expected_attitude = quat;
+}
 
 auto Mission::add_interest_point(Eigen::Vector3f interest_point) -> void {
     interest_points.push_back(interest_point);
@@ -115,7 +132,7 @@ auto Mission::drone_takeoff(float altitude) -> bool {
         rate.sleep();
     }
 
-    while (ros::ok() && position_error.norm > utils::DEFAULT_DISTANCE_TOLERANCE) {
+    while (ros::ok() && controller_state.error.position.norm > utils::DEFAULT_DISTANCE_TOLERANCE) {
         publish();
         ros::spinOnce();
         rate.sleep();
@@ -186,10 +203,43 @@ auto Mission::publish() -> void {
     state.target.position.x = expected_position.x();
     state.target.position.y = expected_position.y();
     state.target.position.z = expected_position.z();
-    std::cout << "state.target.position.x: " << state.target.position.x << std::endl;
-    std::cout << "state.target.position.y: " << state.target.position.y << std::endl;
-    std::cout << "state.target.position.z: " << state.target.position.z << std::endl;
+    compute_attitude();
+    state.target.orientation.x = expected_attitude.getX();
+    state.target.orientation.y = expected_attitude.getY();
+    state.target.orientation.z = expected_attitude.getZ();
+    state.target.orientation.w = expected_attitude.getW();
+    // std::cout << "state.target.position.x: " << state.target.position.x << std::endl;
+    // std::cout << "state.target.position.y: " << state.target.position.y << std::endl;
+    // std::cout << "state.target.position.z: " << state.target.position.z << std::endl;
     pub_mission_state.publish(state);
+
+    if (should_visualise) {
+        visualise();
+    }
+}
+
+auto Mission::visualise() -> void {
+    visualization_msgs::Marker m;
+    m.header.frame_id = utils::FRAME_WORLD;
+    m.header.seq = seq_vis++;
+    m.header.stamp = ros::Time::now();
+
+    m.type = visualization_msgs::Marker::SPHERE;
+
+    m.pose.position.x = target.x();
+    m.pose.position.y = target.y();
+    m.pose.position.z = home_position.z();
+
+    m.scale.x = marker_scale * 2;
+    m.scale.y = marker_scale * 2;
+    m.scale.z = marker_scale * 2;
+
+    m.color.a = 1;
+    m.color.r = 1;
+    m.color.g = 1;
+    m.color.b = 1;
+
+    pub_visualise.publish(m);
 }
 
 auto Mission::find_path(Eigen::Vector3f start, Eigen::Vector3f end)
@@ -299,7 +349,7 @@ auto Mission::fit_trajectory(std::vector<Eigen::Vector3f> path)
             }
         }
         if (valid) {
-            return trajectory::CompoundTrajectory(nh, rate, path, visualise);
+            return trajectory::CompoundTrajectory(nh, rate, path, should_visualise);
         }
     }
     return {};
@@ -330,8 +380,9 @@ auto Mission::exploration_step() -> bool {
     // << amr::utils::RESET << std::endl;
 
     // std::cout << "before if" << std::endl;
-    if (step_count == 0 || (remaining_distance < utils::SMALL_DISTANCE_TOLERANCE &&
-                            position_error.norm < utils::SMALL_DISTANCE_TOLERANCE)) {
+    if (step_count == 0 ||
+        (remaining_distance < utils::SMALL_DISTANCE_TOLERANCE &&
+         controller_state.error.position.norm < utils::SMALL_DISTANCE_TOLERANCE)) {
         // std::cout << "inside if" << std::endl;
         if (waypoint_idx >= interest_points.size()) {
             // std::cout << waypoint_idx << std::endl;
@@ -378,6 +429,7 @@ auto Mission::exploration_step() -> bool {
 }
 
 auto Mission::trajectory_step() -> bool {
+    auto end_reached = false;
     timeout_start_time = ros::Time::now();
 
     if (step_count == 0) {
@@ -390,16 +442,23 @@ auto Mission::trajectory_step() -> bool {
     // std::cout << amr::utils::GREEN << "remaining_distance: " << remaining_distance <<
     // amr::utils::RESET << std::endl;
 
-    if (remaining_distance < utils::DEFAULT_DISTANCE_TOLERANCE &&
-        position_error.norm < utils::DEFAULT_DISTANCE_TOLERANCE) {
-        // std::cout << "end reached!" << std::endl;
-        return true;
+    // end of trajectory has been reached if the remaining distance and position error is small
+    if (remaining_distance < utils::SMALL_DISTANCE_TOLERANCE &&
+        controller_state.error.position.norm < utils::SMALL_DISTANCE_TOLERANCE * 10) {
+        std::cout << "end reached!" << std::endl;
+        // in this case the heading should be towards the center of the object
+        target = object_center;
+        end_reached = true;
+    } else {  // otherwise the next expected position is computed for the current time step
+        expected_position = trajectory.get_point_at_distance(distance);
+        // here the heading should be towards the expected position
+        target = {expected_position.x(), expected_position.y()};
+        end_reached = false;
     }
-    expected_position = trajectory.get_point_at_distance(distance);
-    // std::cout << "Got point " << expected_position << std::endl;
     publish();
     step_count++;
-    return false;
+
+    return end_reached;
 }
 
 auto Mission::go_home() -> void {

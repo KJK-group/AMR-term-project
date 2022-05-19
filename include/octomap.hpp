@@ -117,15 +117,15 @@ class Octomap final {
 
     auto resolution() const -> double { return octree_.getResolution(); }
     // TODO:
-    auto write(const std::filesystem::path& path, bool overwrite = false) const -> bool {
-        if (! overwrite && std::filesystem::is_regular_file(path)) {
-            std::cerr << "";
-            return false;
-        }
+    // auto write(const std::filesystem::path& path, bool overwrite = false) const -> bool {
+    //     if (! overwrite && std::filesystem::is_regular_file(path)) {
+    //         std::cerr << "";
+    //         return false;
+    //     }
 
-        auto s = std::ofstream(path);
-        octree_.writeData(s);
-    }
+    //     auto s = std::ofstream(path);
+    //     octree_.writeData(s);
+    // }
 
     /**
      * @brief returns a const reference to the underlying OcTree

@@ -3,13 +3,16 @@
     <arg name="package" value="amr_term_project"/>
     <arg name="package_path" value="$(find amr_term_project)"/>
     <!-- Controller Arguments -->
-    <arg name="krp" default="0.5"/>
-    <arg name="kri" default="0"/>
-    <arg name="krd" default="0"/>
-    <arg name="kap" default="0.5"/>
-    <arg name="kai" default="0"/>
-    <arg name="kad" default="0"/>
-    <arg name="vel" default="0"/>
+    <arg name="xy_p" default="0.5"/>
+    <arg name="xy_i" default="0"/>
+    <arg name="xy_d" default="0"/>
+    <arg name="yaw_p" default="0.5"/>
+    <arg name="yaw_i" default="0"/>
+    <arg name="yaw_d" default="0"/>
+    <arg name="z_p" default="0.5"/>
+    <arg name="z_i" default="0"/>
+    <arg name="z_d" default="0"/>
+    <arg name="vel" default="0.5"/>
     <!-- topic -->
     <arg name="vicon" default="0"/>
 
@@ -22,9 +25,9 @@
     
     <node
         pkg="$(arg package)"
-        type="pid_controller"
-        name="pid_controller"
-        args="$(arg krp) $(arg kri) $(arg krd) $(arg kap) $(arg kai) $(arg kad)" />
+        type="control_manager"
+        name="control_manager"
+        args="$(arg xy_p) $(arg xy_i) $(arg xy_d) $(arg yaw_p) $(arg yaw_i) $(arg yaw_d) $(arg z_p) $(arg z_i) $(arg z_d)" />
     <node
         pkg="$(arg package)"
         type="mission_manager"

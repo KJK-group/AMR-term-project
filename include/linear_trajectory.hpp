@@ -1,5 +1,5 @@
-#ifndef _MDI_LINEAR_TRAJECTORY_HPP_
-#define _MDI_LINEAR_TRAJECTORY_HPP_
+#ifndef _AMR_LINEAR_TRAJECTORY_HPP_
+#define _AMR_LINEAR_TRAJECTORY_HPP_
 
 #include <eigen3/Eigen/Dense>
 #include <vector>
@@ -18,4 +18,4 @@ class LinearTrajectory {
 };
 }  // namespace amr::trajectory
 
-#endif  // _MDI_LINEAR_TRAJECTORY_HPP_
+#endif  // _AMR_LINEAR_TRAJECTORY_HPP_

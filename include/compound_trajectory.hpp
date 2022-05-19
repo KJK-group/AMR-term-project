@@ -1,5 +1,5 @@
-#ifndef _MDI_TRAJECTORY_HPP_
-#define _MDI_TRAJECTORY_HPP_
+#ifndef _AMR_TRAJECTORY_HPP_
+#define _AMR_TRAJECTORY_HPP_
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -40,4 +40,4 @@ class CompoundTrajectory {
     int seq_marker;
 };
 }  // namespace amr::trajectory
-#endif  // _MDI_TRAJECTORY_HPP_
+#endif  // _AMR_TRAJECTORY_HPP_

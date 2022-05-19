@@ -55,7 +55,7 @@ auto main(int argc, char** argv) -> int {
     interest_points.push_back(hover_point);
 
     // mission instance
-    auto mission = amr::Mission(nh, rate, velocity_target, hover_point, 5, true);
+    auto mission = amr::Mission(nh, rate, {0, 0}, velocity_target, hover_point, 5, true);
     for (auto& p : interest_points) {
         std::cout << p.x() << "\t" << p.y() << "\t" << p.z() << std::endl;
         mission.add_interest_point(p);

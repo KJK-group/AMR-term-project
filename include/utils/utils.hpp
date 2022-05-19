@@ -1,5 +1,5 @@
-#ifndef _MDI_UTILS_HPP_
-#define _MDI_UTILS_HPP_
+#ifndef _AMR_UTILS_HPP_
+#define _AMR_UTILS_HPP_
 
 #include <cassert>
 #include <cmath>
@@ -68,4 +68,4 @@ auto range(int start, int end) -> std::vector<int> {
 // }
 }  // namespace amr::utils
 
-#endif  // _MDI_UTILS_HPP_
+#endif  // _AMR_UTILS_HPP_

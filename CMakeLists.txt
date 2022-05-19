@@ -42,8 +42,11 @@ add_message_files(
   DIRECTORY
   ${CMAKE_CURRENT_SOURCE_DIR}/msg
   FILES
+  PointNorm.msg
   PointNormStamped.msg
   MissionStateStamped.msg
+  ControllerStateStamped.msg
+  Error.msg
 )
 add_service_files(
   FILES
@@ -70,9 +73,7 @@ function(add_ros_dependencies target)
                    ${catkin_EXPORTED_TARGETS})
 endfunction(add_ros_dependencies)
 
-# add_ros_executable(mission_manager src/nodes/mission_manager.cpp)
-add_ros_executable(pid_controller src/nodes/pid_controller.cpp)
-target_sources(pid_controller PUBLIC src/transformlistener.cpp)
+
 add_ros_executable(map_to_odom_tf_broadcaster src/nodes/map_to_odom_tf_broadcaster.cpp)
 
 # Libraries
@@ -89,6 +90,15 @@ target_link_libraries(compound_trajectory bezier_spline linear_trajectory rrt)
 
 add_library(mission SHARED src/mission.cpp)
 target_link_libraries(mission compound_trajectory rrt)
+
+# control library
+add_library(control SHARED src/pid_controller.cpp)
+target_sources(control PUBLIC src/transformlistener.cpp)
+
+# add_ros_executable(mission_manager src/nodes/mission_manager.cpp)
+add_executable(control_manager src/nodes/control_manager.cpp)
+add_ros_dependencies(control_manager)
+target_link_libraries(control_manager ${catkin_LIBRARIES} control)
 
 # executables using libraries
 add_executable(rrt_service src/nodes/rrt_service.cpp)

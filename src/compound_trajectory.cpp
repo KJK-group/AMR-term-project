@@ -5,7 +5,7 @@ CompoundTrajectory::CompoundTrajectory(ros::NodeHandle& nh, ros::Rate& rate,
                                        std::vector<Eigen::Vector3f> path, bool visualise,
                                        float marker_scale)
     : seq_marker(0), rate(rate) {
-    pub_visualisation = nh.advertise<visualization_msgs::MarkerArray>("/mdi/visualisation",
+    pub_visualisation = nh.advertise<visualization_msgs::MarkerArray>("/amr/visualisation",
                                                                       utils::DEFAULT_QUEUE_SIZE);
 
     assert(path.size() > 1);

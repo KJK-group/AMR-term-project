@@ -1,5 +1,5 @@
-#ifndef _MDI_MISSION_MANAGER_HPP_
-#define _MDI_MISSION_MANAGER_HPP_
+#ifndef _AMR_MISSION_MANAGER_HPP_
+#define _AMR_MISSION_MANAGER_HPP_
 
 #include <geometry_msgs/PoseStamped.h>
 #include <mavros_msgs/CommandBool.h>
@@ -8,6 +8,7 @@
 #include <mavros_msgs/State.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <visualization_msgs/Marker.h>
 
 #include <eigen3/Eigen/Dense>
@@ -15,6 +16,7 @@
 #include <optional>
 #include <utility>
 
+#include "amr_term_project/ControllerStateStamped.h"
 #include "amr_term_project/MissionStateStamped.h"
 #include "amr_term_project/PointNormStamped.h"
 #include "amr_term_project/RrtFindPath.h"
@@ -30,7 +32,7 @@ constexpr auto INITIAL_ALTITUDE = 5;
 constexpr auto MISSION_TIMEOUT = 40;
 class Mission {
    public:
-    Mission(ros::NodeHandle& nh, ros::Rate& rate, float velocity_target = 1,
+    Mission(ros::NodeHandle& nh, ros::Rate& rate, Eigen::Vector2f target, float velocity_target = 1,
             Eigen::Vector3f home = {0, 0, INITIAL_ALTITUDE}, int timeout_seconds = MISSION_TIMEOUT,
             bool visualise = false);
     enum state { PASSIVE, HOME, EXPLORATION, INSPECTION, LAND };
@@ -62,9 +64,12 @@ class Mission {
     auto publish() -> void;
 
     auto state_cb(const mavros_msgs::State::ConstPtr& state) -> void;
-    auto error_cb(const amr_term_project::PointNormStamped::ConstPtr& error) -> void;
+    auto controller_state_cb(const amr_term_project::ControllerStateStamped::ConstPtr& error)
+        -> void;
     auto odom_cb(const nav_msgs::Odometry::ConstPtr& odom) -> void;
 
+    auto compute_attitude() -> void;
+    auto visualise() -> void;
     auto outside() -> bool;
 
     ros::NodeHandle& nh;
@@ -93,11 +98,14 @@ class Mission {
     // msg instances
     mavros_msgs::State drone_state;
     nav_msgs::Odometry drone_odom;
-    amr_term_project::PointNormStamped position_error;
+    amr_term_project::ControllerStateStamped controller_state;
 
     // points
     Eigen::Vector3f home_position;
     Eigen::Vector3f expected_position;
+    Eigen::Vector2f target;
+    Eigen::Vector2f object_center;
+    tf2::Quaternion expected_attitude;
 
     // time
     ros::Time start_time;
@@ -115,13 +123,14 @@ class Mission {
     // state
     int seq_state;
     int seq_point;
+    int seq_vis;
     int step_count;
     bool inspection_complete;
     bool exploration_complete;
 
     // visualisation
     float marker_scale;
-    bool visualise;
+    bool should_visualise;
 };
 }  // namespace amr
-#endif  // _MDI_MISSION_MANAGER_HPP_
+#endif  // _AMR_MISSION_MANAGER_HPP_
