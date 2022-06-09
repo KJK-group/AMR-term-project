@@ -28,7 +28,7 @@ git clone https://github.com/KJK-group/AMR-term-project.git
 [octomap](https://github.com/OctoMap/octomap)
 
 ```sh
-sudo apt install "${ROS_DISTRO}-desktop-octomap*"
+sudo apt install "${ROS_DISTRO}-octomap*"
 ```
 
 ### Task 3
