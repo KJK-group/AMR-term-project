@@ -36,13 +36,13 @@ follow the installation instructions for [pytorch](https://pytorch.org/) on thei
 pip install 
 ```
 
-
-## How to run
-
-First build the package using `catkin`. Go to the directory where you downloaded this repository and run
+## Build
+Build the package using `catkin`. Go to the directory where you downloaded this repository and run
 ```sh
 catkin build --this
 ```
+
+## How to run
 
 
 ### Task 1
@@ -69,6 +69,3 @@ The report can be found in `./paper/amr-term-project.pdf`
 - Jens Jensen - 201907928@post.au.dk
 - Kevork Donato - 201907831@post.au.dk
 - Kristoffer Sørensen - 201908140@post.au.dk
-
-
-
