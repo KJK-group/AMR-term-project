@@ -19,14 +19,20 @@ git clone https://github.com/KJK-group/AMR-term-project.git
  
 ## Dependencies
 
+### Task 1 and 2
+
 [octomap](https://github.com/OctoMap/octomap)
 
 ```sh
 sudo apt install "${ROS_DISTRO}-desktop-octomap*"
 ```
 
-```sh
+### Task 3
 
+follow the installation instructions for [pytorch](https://pytorch.org/) on their website.
+
+```sh
+pip install 
 ```
 
 
