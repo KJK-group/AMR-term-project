@@ -76,9 +76,8 @@ roslaunch amr_term_project mission.launch
 ```
 
 ### Task 3
-```sh
-kevork
-```
+
+For testing the model used in task 3 see the README section in `./model_testing.ipynb`.
 
 ## Report
 The report can be found in `./paper/amr-term-project.pdf`
