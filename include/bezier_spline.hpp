@@ -8,12 +8,12 @@
 #include <utility>
 #include <vector>
 
-#include "mdi/utils/math.hpp"
+#include "utils/math.hpp"
 
-namespace mdi {
+namespace amr::trajectory {
 
 using Eigen::Vector3f;
-// using mdi::utils::binomial_coefficient;
+// using amr::utils::binomial_coefficient;
 using std::abs;
 using std::pair;
 using std::pow;
@@ -45,6 +45,6 @@ class BezierSpline {
     auto generate_distance_lut() -> void;
     auto generate_offset_points() -> void;
 };
-}  // namespace mdi
+}  // namespace amr::trajectory
 
 #endif  // _MULTI_DRONE_INSPECTION_BEZIER_SPLINE_HPP_

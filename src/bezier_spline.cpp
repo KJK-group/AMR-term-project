@@ -1,8 +1,8 @@
-#include "mdi/bezier_spline.hpp"
+#include "bezier_spline.hpp"
 
 #include <iostream>
 
-namespace mdi {
+namespace amr::trajectory {
 //--------------------------------------------------------------------------------------------------
 // Constructor; generates the spline the first time,
 // calling generate_spline with `points` and `resolution`
@@ -158,7 +158,7 @@ auto BezierSpline::generate_binomial_lut() -> void {
 
     for (int i = 0; i < this->size; i++) {
         // std::cout << "idx: " << i << std::endl;
-        binomial_lut.push_back(mdi::utils::binomial_coefficient(this->size, i));
+        binomial_lut.push_back(amr::utils::binomial_coefficient(this->size, i));
     }
     // std::cerr << "[DEBUG] " << __FILE__ << ":" << __LINE__ << ": "
     //   << " after for loop" << '\n';
@@ -175,11 +175,13 @@ auto BezierSpline::get_point_at_time(float time) -> Vector3f {
 // Returns the point at the `distance` along the spline
 auto BezierSpline::get_point_at_distance(float distance) -> Vector3f {
     // assume distance is greater not negative
-    assert(distance >= 0);
+    // assert(distance >= 0);
     // std::cout << "distance = " << distance << std::endl;
     distance = this->distance_lut[this->distance_lut.size() - 1] - distance;
     if (distance < 0) {
         distance = 0;
+    } else if (distance > this->distance_lut.back()) {
+        distance = this->distance_lut.back();
     }
     // std::cout << "distance = " << distance << std::endl;
     auto t_idx = this->get_time_idx(distance);
@@ -248,4 +250,4 @@ auto BezierSpline::get_length() -> float {
         return 0;
     }
 }
-}  // namespace mdi
+}  // namespace amr::trajectory

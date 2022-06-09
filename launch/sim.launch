@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="package" value="amr_term_project"/>
+    <arg name="package_path" value="$(find amr_term_project)"/>
+    <!-- Paths -->
+    <arg name="ws_path" default="~/catkin_ws"/>
+    <arg name="px4_wd" default="~/PX4-Autopilot"/>
+
+    <!-- <arg name="lp" default="valgrind"/> -->
+    <arg name="lp" default=""/>
+
+
+	<node pkg="$(arg package)" type="map_to_odom_tf_broadcaster" name="map_to_odom_tf_broadcaster" output="screen" />
+
+    <!-- Simulation Environment -->
+    <include file="$(find airlab_gazebo)/launch/spawn_obstacles.launch" />
+
+    <include file="$(find mavros)/launch/px4.launch">
+        <arg name="fcu_url" default="udp://:14540@127.0.0.1:14557"/>
+    </include>
+</launch>
