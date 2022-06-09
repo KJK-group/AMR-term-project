@@ -2,7 +2,31 @@
 Aarhus University BSc Course Autonomous Mobile Robots Term Project (Spring 2022)
 
 
+## Download
+
+```sh
+git clone 
+```
+
+
 ## How to run
+
+
+```sh
+
+```
+
+```sh
+
+```
+
+```sh
+
+```
+
+```sh
+
+```
 
 
 
