@@ -4,10 +4,13 @@ Aarhus University BSc Course Autonomous Mobile Robots Term Project (Spring 2022)
 
 ## Operating System Platform
 
-The code has been developed and tested on Ubuntu-20.04, but should be able to run on Ubuntu-18.04. Dusing develo
+The code has been developed and tested on Ubuntu-20.04, but should be able to run on Ubuntu-18.04. We 
+have created and tested a patch that can be applied to make the code work.
+IF you use Ubuntu-18.04 then run the this command to apply the patch.
 
-
-
+```sh
+git apply ./patches/ubuntu-18.04.patch
+```
 
 ## Download
 
