@@ -63,7 +63,7 @@ rossun amr_term_project launch_sim.sh <PX4 root directory> <catkin workspace roo
 ```
 
 If you are not using `terminator` you have to run the following two scripts in order to start PX4 and mavros.
-`./scripts/run.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> ` and `roslaunch amr_term_project sim.launch'.
+`./scripts/run.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> ` and `roslaunch amr_term_project sim.launch`
 
 ### Task 1
 ```sh
