@@ -41,10 +41,10 @@ git checkout <tag> # e.g. v1.11.3
 
 ### Task 3
 
-follow the installation instructions for [pytorch](https://pytorch.org/) on their website.
+follow the installation instructions for [pytorch](https://pytorch.org/) on their website. Remember to install the `torchvision` along with `pytorch`.
 
 ```sh
-pip install 
+pip install matplotlib numpy Pillow
 ```
 
 ## Build
