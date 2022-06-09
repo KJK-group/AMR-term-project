@@ -55,15 +55,15 @@ catkin build --this
 
 ## How to run
 
- 
+### Setup for task 1 and 2
 
 NOTE: this script assumes that the terminal emulator used is `terminator`.
 ```sh
 rossun amr_term_project launch_sim.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> 
 ```
 
-If you are not using `terminator` you have to run the following script in order to start PX4 and mavros.
-`./scripts/run.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> `
+If you are not using `terminator` you have to run the following two scripts in order to start PX4 and mavros.
+`./scripts/run.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> ` and `roslaunch amr_term_project sim.launch'.
 
 ### Task 1
 ```sh
@@ -72,17 +72,16 @@ roslaunch amr_term_project pid_test.launch
 
 ### Task 2
 ```sh
-roslaunch amr ...
+roslaunch amr_term_project mission.launch
 ```
 
 ### Task 3
 ```sh
-
+kevork
 ```
 
 ## Report
 The report can be found in `./paper/amr-term-project.pdf`
-
 
 ## Authors
 
