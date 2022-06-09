@@ -1,0 +1,138 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 01904ec..b1a7c56 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.14)
++cmake_minimum_required(VERSION 3.10)
+ project(
+   amr_term_project
+   VERSION 0.1.0
+@@ -78,7 +78,7 @@ add_ros_executable(map_to_odom_tf_broadcaster src/nodes/map_to_odom_tf_broadcast
+
+ # Libraries
+ add_library(bezier_spline SHARED src/bezier_spline.cpp)
+-target_sources(bezier_spline PUBLIC src/math.cpp)
++target_sources(bezier_spline PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/math.cpp)
+
+ add_library(linear_trajectory SHARED src/linear_trajectory.cpp)
+
+@@ -93,7 +93,7 @@ target_link_libraries(mission compound_trajectory rrt)
+
+ # control library
+ add_library(control SHARED src/pid_controller.cpp)
+-target_sources(control PUBLIC src/transformlistener.cpp)
++target_sources(control PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/transformlistener.cpp)
+
+ # add_ros_executable(mission_manager src/nodes/mission_manager.cpp)
+ add_executable(control_manager src/nodes/control_manager.cpp)
+@@ -120,4 +120,4 @@ target_link_libraries(create_octomap_of_airlab_cage ${OCTOMAP_LIBRARIES})
+ target_compile_options(create_octomap_of_airlab_cage PUBLIC -O2 -std=c++17
+                                                             -Wall -Werror)
+
+-add_ros_executable(set_point_node src/nodes/set_point_node.cpp)
+\ No newline at end of file
++add_ros_executable(set_point_node src/nodes/set_point_node.cpp)
+diff --git a/include/rrt.hpp b/include/rrt.hpp
+index 6729e6d..0bf894d 100644
+--- a/include/rrt.hpp
++++ b/include/rrt.hpp
+@@ -125,6 +125,7 @@ class RRT {
+      */
+     [[nodiscard]] auto connected() const -> bool { return reachable_nodes() == size(); }
+
++/*
+ #ifdef MEASURE_PERF
+     ~RRT();
+
+@@ -134,6 +135,7 @@ class RRT {
+     }
+     auto disable_perf_logging() -> void { log_perf_measurements_enabled_ = false; }
+ #endif  // MEASURE_PERF
++*/
+
+     auto register_cb_for_event_on_new_node_created(std::function<void(const vec3&, const vec3&)> cb)
+         -> void {
+@@ -458,12 +460,15 @@ class RRT {
+     bool after_optimizing_waypoints_status_ = true;
+     bool on_raycast_status_ = false;
+
++/*
+ #ifdef MEASURE_PERF
+     bool log_perf_measurements_enabled_ = false;
+     std::filesystem::path file_path_csv_;
+     using microseconds_t = std::chrono::duration<double, std::nano>;
+     std::vector<std::chrono::nanoseconds> timimg_measurements_{};
+ #endif  // MEASURE_PERF
++*/
+ };
+
++
+ }  // namespace amr::rrt
+diff --git a/include/transformlistener.hpp b/include/transformlistener.hpp
+index 4dba62b..c364800 100644
+--- a/include/transformlistener.hpp
++++ b/include/transformlistener.hpp
+@@ -13,9 +13,7 @@ namespace utils::transform {
+
+ class TransformListener {
+    public:
+-    TransformListener() = default;
+-    TransformListener(const TransformListener&) = default;
+-
++
+     auto lookup_tf(const std::string& to_frame, const std::string& from_frame,
+                    ros::Time time = ros::Time(0)) -> std::optional<geometry_msgs::TransformStamped>;
+
+diff --git a/include/utils/common_headers.hpp b/include/utils/common_headers.hpp
+index 7e82aea..8b2353b 100644
+--- a/include/utils/common_headers.hpp
++++ b/include/utils/common_headers.hpp
+@@ -8,7 +8,7 @@
+ #include <cstddef>
+ #include <cstdint>
+ #include <cstdlib>
+-#include <filesystem>
++//#include <filesystem>
+ #include <fstream>
+ #include <functional>
+ #include <iostream>
+diff --git a/libs/kdtree/CMakeLists.txt b/libs/kdtree/CMakeLists.txt
+index 8f595b9..0f423b0 100644
+--- a/libs/kdtree/CMakeLists.txt
++++ b/libs/kdtree/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.14)
++cmake_minimum_required(VERSION 3.10)
+ project(
+   kdtree
+   VERSION 0.1
+diff --git a/src/rrt.cpp b/src/rrt.cpp
+index 09ad26f..823e333 100644
+--- a/src/rrt.cpp
++++ b/src/rrt.cpp
+@@ -10,7 +10,7 @@
+ #include <cmath>
+ #include <cstddef>
+ #include <cstdint>
+-#include <filesystem>
++//#include <filesystem>
+ #include <fstream>
+ #include <functional>
+ #include <iostream>
+@@ -968,6 +968,7 @@ auto RRT::from_rosparam(std::string_view prefix) -> RRT {
+             get_float("probability_of_testing_full_path_from_new_node_to_goal")};
+ }
+
++/*
+ #ifdef MEASURE_PERF
+
+ RRT::~RRT() {
+@@ -1015,6 +1016,7 @@ RRT::~RRT() {
+ }
+
+ #endif  // MEASURE_PERF
++*/
+
+ std::ostream& operator<<(std::ostream& os, const RRT& rrt) {
+     os << "RRT:\n";
