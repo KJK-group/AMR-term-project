@@ -4,7 +4,7 @@ Aarhus University BSc Course Autonomous Mobile Robots Term Project (Spring 2022)
 
 ## Operating System Platform
 
-The code has been developed and tested on Ubuntu-20.04, but should be able to run on Ubuntu-18.04.
+The code has been developed and tested on Ubuntu-20.04, but should be able to run on Ubuntu-18.04. Dusing develo
 
 
 
