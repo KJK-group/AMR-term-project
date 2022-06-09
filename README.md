@@ -30,6 +30,14 @@ git clone https://github.com/KJK-group/AMR-term-project.git
 ```sh
 sudo apt install "${ROS_DISTRO}-octomap*"
 ```
+[PX4-Autopilot](https://github.com/PX4/PX4-Autopilot/tree/46c9d1e2885eca6e3ea095afcfb6a6583260fd95) follow the installation instructions
+in the projects README. We have used version `v1.12.3`. 
+if you are using Ubuntu-18.04 you might have to use version `v1.11.3`
+
+You can switch versions by checking out the commit tagged with the given version number
+```sh
+git checkout <tag> # e.g. v1.11.3
+```
 
 ### Task 3
 
@@ -47,15 +55,24 @@ catkin build --this
 
 ## How to run
 
+ 
+
+NOTE: this script assumes that the terminal emulator used is `terminator`.
+```sh
+rossun amr_term_project launch_sim.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> 
+```
+
+If you are not using `terminator` you have to run the following script in order to start PX4 and mavros.
+`./scripts/run.sh <PX4 root directory> <catkin workspace root e.g. ~/catkin_ws/> `
 
 ### Task 1
 ```sh
-
+roslaunch amr_term_project pid_test.launch
 ```
 
 ### Task 2
 ```sh
-
+roslaunch amr ...
 ```
 
 ### Task 3
