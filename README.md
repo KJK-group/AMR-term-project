@@ -6,7 +6,8 @@ Aarhus University BSc Course Autonomous Mobile Robots Term Project (Spring 2022)
 
 The code has been developed and tested on Ubuntu-20.04, but should be able to run on Ubuntu-18.04.
 
-`-std=c++17`
+
+
 
 ## Download
 
@@ -36,27 +37,31 @@ pip install
 ```
 
 
-
-
 ## How to run
 
+First build the package using `catkin`. Go to the directory where you downloaded this repository and run
+```sh
+catkin build --this
+```
 
+
+### Task 1
 ```sh
 
 ```
 
+### Task 2
 ```sh
 
 ```
 
+### Task 3
 ```sh
 
 ```
 
-```sh
-
-```
-
+## Report
+The report can be found in `./paper/amr-term-project.pdf`
 
 
 ## Authors
